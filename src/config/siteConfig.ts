@@ -34,6 +34,12 @@ export const siteConfig = {
     en: 'Learn the 5-day SSB procedure in English or Hindi, practise timed PPDT and word association (WAT) on real paper, and get instant AI feedback on your handwritten responses.',
     hi: 'अंग्रेजी या हिंदी में 5-दिवसीय एसएसबी प्रक्रिया समझें, वास्तविक कागज पर समयबद्ध PPDT और शब्द संयोजन (WAT) अभ्यास करें, और अपनी हस्तलिखित प्रतिक्रियाओं पर त्वरित AI फीडबैक प्राप्त करें।',
   },
+  promoBanner: {
+    enabled: false,
+    textEn: '',
+    textHi: '',
+    link: '',
+  },
   disclaimer: {
     en: 'Feedback is AI-generated practice guidance. It is not an official assessment or a prediction of selection.',
     hi: 'फीडबैक AI-जनित अभ्यास मार्गदर्शन है। यह कोई आधिकारिक मूल्यांकन या चयन की भविष्यवाणी नहीं है।',

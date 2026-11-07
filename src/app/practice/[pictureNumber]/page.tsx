@@ -12,13 +12,19 @@ import {
   Eye, 
   Volume2, 
   VolumeX, 
-  X,
-  AlertCircle
+  X, 
+  AlertCircle 
 } from 'lucide-react';
 import { PPDTPicture, getPictureByNumber } from '@/data/pictures';
 import { canAttemptToday } from '@/lib/guestStorage';
 import { useLanguage } from '@/context/LanguageContext';
 import { siteConfig } from '@/config/siteConfig';
+import { 
+  Button, 
+  CardBase, 
+  FeatureCard, 
+  TagChip 
+} from '@/components/ui';
 
 export default function SinglePicturePracticePage() {
   const params = useParams();
@@ -26,13 +32,19 @@ export default function SinglePicturePracticePage() {
   const { lang } = useLanguage();
 
   const rawNum = params?.pictureNumber;
-  const pictureNumber = typeof rawNum === 'string' ? parseInt(rawNum, 10) : Array.isArray(rawNum) ? parseInt(rawNum[0], 10) : NaN;
+  const pictureNumber =
+    typeof rawNum === 'string'
+      ? parseInt(rawNum, 10)
+      : Array.isArray(rawNum)
+      ? parseInt(rawNum[0], 10)
+      : NaN;
   const initialPicture = !isNaN(pictureNumber) ? getPictureByNumber(pictureNumber) : null;
-  
+
   const [picture, setPicture] = useState<PPDTPicture | null>(initialPicture);
   const [notFound, setNotFound] = useState(!initialPicture);
 
   const [step, setStep] = useState<'ready' | 'picture' | 'writing'>('ready');
+  const [paperReadyConfirmed, setPaperReadyConfirmed] = useState(false);
 
   // Timers (Clock-time based delta - Unchanged)
   const PICTURE_DURATION_SEC = 30;
@@ -123,7 +135,6 @@ export default function SinglePicturePracticePage() {
       const remaining = Math.max(0, PICTURE_DURATION_SEC - elapsedSec);
       setTimeLeft(remaining);
 
-      // Warning beeps in last 3 seconds
       if (remaining <= 3 && remaining > 0) {
         playBeep(520, 0.1);
       }
@@ -183,22 +194,21 @@ export default function SinglePicturePracticePage() {
   // Not Found view
   if (notFound || (!picture && isNaN(pictureNumber))) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-olive-900/60 border border-olive-700/60 flex items-center justify-center text-camo-gold mb-4">
-          <AlertCircle className="w-8 h-8" />
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-ink max-w-md mx-auto">
+        <div className="w-12 h-12 rounded-lg bg-card-tint-rose text-semantic-error flex items-center justify-center mb-4">
+          <AlertCircle className="w-6 h-6" />
         </div>
-        <h1 className="text-2xl font-serif font-bold text-white mb-2">
+        <h1 className="text-[26px] font-semibold text-ink mb-2">
           {lang === 'hi' ? siteConfig.practiceGrid.pictureNotFound.hi : siteConfig.practiceGrid.pictureNotFound.en}
         </h1>
-        <p className="text-sm text-[#a8baa3] mb-6 max-w-md">
+        <p className="text-[14px] text-slate mb-6">
           {lang === 'hi' ? 'अनुरोधित चित्र संख्या उपलब्ध नहीं है।' : 'The requested picture number does not exist in the collection.'}
         </p>
-        <Link
-          href="/practice"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white font-semibold text-sm transition-all"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>{lang === 'hi' ? siteConfig.practiceGrid.backToPictures.hi : siteConfig.practiceGrid.backToPictures.en}</span>
+        <Link href="/practice">
+          <Button variant="secondary">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <span>{lang === 'hi' ? siteConfig.practiceGrid.backToPictures.hi : siteConfig.practiceGrid.backToPictures.en}</span>
+          </Button>
         </Link>
       </div>
     );
@@ -208,268 +218,269 @@ export default function SinglePicturePracticePage() {
   const pictureTitle = `${prefix} ${pictureNumber}`;
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-4xl mx-auto w-full font-sans">
-      {/* PHASE 0: READY SCREEN */}
+    <div className="flex-1 flex flex-col items-center justify-center font-sans text-ink">
+      {/* =========================================
+          PHASE 0: READY SCREEN (White canvas)
+         ========================================= */}
       {step === 'ready' && (
-        <div className="w-full bg-[#121911] border border-olive-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 animate-fade-in">
+        <div className="w-full max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
           {/* Back Navigation + Sound Toggle */}
-          <div className="flex items-center justify-between border-b border-olive-800/80 pb-4">
+          <div className="flex items-center justify-between border-b border-hairline pb-4">
             <Link
               href="/practice"
-              className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-olive-300 hover:text-white transition-colors group"
+              className="inline-flex items-center gap-2 text-[14px] font-medium text-link-blue hover:underline"
             >
-              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              <ArrowLeft className="w-4 h-4" />
               <span>{lang === 'hi' ? siteConfig.practiceGrid.backToPictures.hi : siteConfig.practiceGrid.backToPictures.en}</span>
             </Link>
 
-            <button
+            <Button
+              variant="ghost"
               onClick={() => setSoundEnabled(!soundEnabled)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-olive-950/80 border border-olive-800 text-gray-300 hover:text-white transition-colors"
+              className="text-[13px] text-charcoal flex items-center gap-1.5"
               title="Toggle Timer Chimes"
-              aria-label={soundEnabled ? "Timer chimes on" : "Timer chimes muted"}
             >
               {soundEnabled ? (
                 <>
-                  <Volume2 className="w-3.5 h-3.5 text-camo-gold" />
+                  <Volume2 className="w-4 h-4 text-primary" />
                   <span>{lang === 'hi' ? 'ध्वनि चालू' : 'Sound On'}</span>
                 </>
               ) : (
                 <>
-                  <VolumeX className="w-3.5 h-3.5 text-[#a8baa3]" />
+                  <VolumeX className="w-4 h-4 text-steel" />
                   <span>{lang === 'hi' ? 'म्यूट' : 'Muted'}</span>
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           {/* Heading */}
-          <div className="text-center sm:text-left">
-            <h1 className="text-2xl sm:text-3xl font-serif font-extrabold text-white">
+          <div>
+            <h1 className="text-[32px] md:text-[36px] font-semibold text-ink tracking-tight">
               {pictureTitle}
             </h1>
-            <p className="text-xs sm:text-sm text-[#a8baa3] mt-1">
-              {lang === 'hi' 
+            <p className="text-[15px] text-slate mt-1">
+              {lang === 'hi'
                 ? '30 सेकंड चित्र अवलोकन · 4 मिनट हस्तलिखित कहानी लेखन'
                 : '30s Picture Observation · 4-Minute Handwritten Story Writing'}
             </p>
           </div>
 
-          {/* Two Phase Explanation Boxes */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#0e140d] border border-olive-900/80 space-y-2">
-              <h2 className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm uppercase tracking-wider text-olive-300">
-                <Eye className="w-4 h-4 text-camo-gold" />
-                {lang === 'hi' ? 'चरण 1: 30 सेकंड चित्र अवलोकन' : 'Phase 1: 30-Second Picture View'}
+          {/* Two Phase Cards (30s in Sky, 4m in Peach) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <FeatureCard tint="sky" className="p-6 space-y-2">
+              <h2 className="text-[16px] font-semibold text-ink flex items-center gap-1.5 uppercase tracking-wide">
+                <Eye className="w-4 h-4 text-link-blue" />
+                <span>{lang === 'hi' ? 'चरण 1: 30 सेकंड अवलोकन' : 'Phase 1: 30-Second View'}</span>
               </h2>
-              <p className="text-[#a8baa3] leading-relaxed text-xs sm:text-sm">
-                {lang === 'hi' 
-                  ? 'स्क्रीन पर परीक्षा-शैली का चित्र आएगा। मुख्य संकेत देखें:'
-                  : 'An exam-style picture will appear. Observe the key cues:'}
+              <p className="text-[14px] text-charcoal leading-relaxed">
+                {lang === 'hi' ? 'स्क्रीन पर धुंधला चित्र आएगा। मुख्य संकेत देखें:' : 'An exam-style picture will appear. Observe the key cues:'}
               </p>
-              <ul className="space-y-1 text-[#a8baa3] text-xs sm:text-sm pl-2">
-                <li>• <strong>{lang === 'hi' ? 'पात्र:' : 'Characters:'}</strong> {lang === 'hi' ? 'संख्या, आयु और लिंग।' : 'Number of figures, age & gender.'}</li>
-                <li>• <strong>{lang === 'hi' ? 'मनोदशा:' : 'Mood:'}</strong> Positive (+), Neutral (0), Negative (-).</li>
-                <li>• <strong>{lang === 'hi' ? 'परिवेश:' : 'Setting:'}</strong> {lang === 'hi' ? 'ग्रामीण, शहरी, इनडोर या खुला क्षेत्र।' : 'Rural, urban, indoor, or field.'}</li>
+              <ul className="space-y-1 text-[13px] text-charcoal pl-2">
+                <li>• <strong>Characters:</strong> Number of figures, age &amp; gender.</li>
+                <li>• <strong>Mood:</strong> Positive (+), Neutral (0), Negative (-).</li>
+                <li>• <strong>Setting:</strong> Rural, urban, indoor, or outdoor field.</li>
               </ul>
-            </div>
+            </FeatureCard>
 
-            <div className="p-4 sm:p-5 rounded-2xl bg-[#0e140d] border border-olive-900/80 space-y-2">
-              <h2 className="font-bold text-white flex items-center gap-1.5 text-xs sm:text-sm uppercase tracking-wider text-olive-300">
-                <FileText className="w-4 h-4 text-camo-gold" />
-                {lang === 'hi' ? 'चरण 2: 4 मिनट कहानी लेखन' : 'Phase 2: 4-Minute Story Writing'}
+            <FeatureCard tint="peach" className="p-6 space-y-2">
+              <h2 className="text-[16px] font-semibold text-ink flex items-center gap-1.5 uppercase tracking-wide">
+                <FileText className="w-4 h-4 text-brand-orange" />
+                <span>{lang === 'hi' ? 'चरण 2: 4 मिनट कहानी लेखन' : 'Phase 2: 4-Minute Writing'}</span>
               </h2>
-              <p className="text-[#a8baa3] leading-relaxed text-xs sm:text-sm">
-                {lang === 'hi' ? '10-75-15 नियम के अनुसार कागज पर पेन से लिखें:' : 'Write on paper with pen following the 10-75-15 rule:'}
+              <p className="text-[14px] text-charcoal leading-relaxed">
+                {lang === 'hi' ? '10-75-15 संरचना के अनुसार कागज पर पेन से लिखें:' : 'Write on paper with pen following the 10-75-15 rule:'}
               </p>
-              <ul className="space-y-1 text-[#a8baa3] text-xs sm:text-sm pl-2">
-                <li>• <strong>10% Setup:</strong> {lang === 'hi' ? 'मुख्य पात्र का नाम, आयु, संदर्भ।' : 'Protagonist name, age, context (1 sentence).'}</li>
-                <li>• <strong>75% Action:</strong> {lang === 'hi' ? 'व्यवस्थित प्रत्यक्ष कार्य एवं टीमवर्क।' : 'Methodical, hands-on action and teamwork.'}</li>
-                <li>• <strong>15% Resolution:</strong> {lang === 'hi' ? 'सकारात्मक तार्किक परिणाम।' : 'Earned positive outcome.'}</li>
+              <ul className="space-y-1 text-[13px] text-charcoal pl-2">
+                <li>• <strong>10% Setup:</strong> Protagonist name, age, situation (1 sentence).</li>
+                <li>• <strong>75% Action:</strong> Methodical hands-on actions and team effort.</li>
+                <li>• <strong>15% Resolution:</strong> Logical, earned positive outcome.</li>
               </ul>
-            </div>
+            </FeatureCard>
           </div>
 
-          {/* Paper and Pen Ready Reminder */}
-          <div className="p-4 rounded-2xl bg-olive-950/70 border border-olive-700/60 flex items-start gap-3 text-xs sm:text-sm text-[#a8baa3]">
-            <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-            <div>
-              <strong className="text-white font-semibold">
-                {lang === 'hi' ? 'कागज और पेन तैयार रखें: ' : 'Have paper and pen ready: '}
-              </strong>
-              {lang === 'hi'
-                ? 'समय शुरू होते ही अपनी कहानी कागज पर लिखें। 4 मिनट पूरे होने पर तुरंत AI फीडबैक के लिए फोटो लें।'
-                : 'When time starts, write your story on paper. At the end of 4 minutes, you will take a photo of your paper to receive instant AI feedback.'}
-            </div>
-          </div>
+          {/* Paper and Pen Ready Reminder on card-tint-yellow */}
+          <FeatureCard tint="yellow" className="p-5 flex items-start gap-3.5">
+            <input
+              type="checkbox"
+              id="paper-ready-ppdt"
+              checked={paperReadyConfirmed}
+              onChange={(e) => setPaperReadyConfirmed(e.target.checked)}
+              className="w-5 h-5 mt-0.5 rounded-sm border-hairline-strong text-primary focus:ring-primary cursor-pointer"
+            />
+            <label htmlFor="paper-ready-ppdt" className="text-[14px] text-charcoal cursor-pointer select-none">
+              <strong className="text-ink font-semibold">I have paper and pen ready: </strong>
+              When time starts, write your story on paper. At the end of 4 minutes, you will take a photo to receive instant AI feedback.
+            </label>
+          </FeatureCard>
 
-          {/* Prominent Begin Button (Timer only starts after clicking this) */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-            <div className="text-xs sm:text-sm text-[#a8baa3]">
-              {lang === 'hi' ? 'तैयार होने पर बटन दबाएं' : 'Press begin when ready to observe the picture'}
-            </div>
-
-            <button
+          {/* Begin Button */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-3 border-t border-hairline">
+            <span className="text-[13px] text-slate">
+              Once you click Begin, the 30-second picture observation will start immediately.
+            </span>
+            <Button
+              variant="primary"
               onClick={handleStartPicture}
-              className="w-full sm:w-auto min-h-[48px] px-8 py-3.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white font-bold text-sm sm:text-base shadow-xl shadow-olive-950/60 transition-all flex items-center justify-center gap-2 group"
+              disabled={!paperReadyConfirmed}
+              className="text-[15px] px-8 py-3 w-full sm:w-auto"
             >
-              <Play className="w-4 h-4 text-camo-gold fill-camo-gold group-hover:scale-110 transition-transform" />
+              <Play className="w-4 h-4 fill-white mr-2" />
               <span>{lang === 'hi' ? siteConfig.practiceGrid.begin.hi : siteConfig.practiceGrid.begin.en}</span>
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
-      {/* PHASE 1: 30-SECOND PICTURE VIEW (Focus Mode) */}
+      {/* ========================================================
+          PHASE 1: 30-SECOND PICTURE VIEW (Focus Mode, Brand Navy)
+         ======================================================== */}
       {step === 'picture' && picture && (
-        <div className="w-full min-h-[85vh] flex flex-col items-center justify-center space-y-4 animate-fade-in py-4">
-          <div className="w-full max-w-2xl flex items-center justify-between px-2">
-            <button
-              onClick={handleExit}
-              className="px-3 py-1.5 rounded-lg border border-red-900/60 bg-red-950/40 text-red-300 hover:text-white hover:bg-red-900/60 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
+        <div className="fixed inset-0 z-50 bg-brand-navy text-on-dark flex flex-col justify-between p-6 sm:p-10 select-none">
+          {/* Top Bar inside focus screen */}
+          <div className="flex items-center justify-between max-w-4xl mx-auto w-full">
+            <Button variant="secondary-on-dark" onClick={handleExit} className="text-[13px] py-1.5 px-3">
+              <X className="w-3.5 h-3.5 mr-1.5" />
               <span>Exit Practice</span>
-            </button>
+            </Button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-olive-300 px-2 py-1 rounded bg-olive-950 border border-olive-800">
-                {pictureTitle}
-              </span>
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="p-1.5 rounded-lg bg-olive-950 border border-olive-800 text-gray-300 hover:text-white"
-                title="Toggle Sound"
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-camo-gold" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
-              </button>
+            <span className="text-[12px] font-semibold text-on-dark-muted uppercase tracking-widest">
+              Phase 1 · 30-Second Picture Observation
+            </span>
+
+            <Button
+              variant="ghost"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="text-on-dark hover:bg-white/10"
+              title="Toggle Sound"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-brand-purple-300" /> : <VolumeX className="w-4 h-4 text-on-dark-muted" />}
+            </Button>
+          </div>
+
+          {/* Picture Container (Centred, 12px radius, shadow level 3) */}
+          <div className="flex-1 flex flex-col items-center justify-center my-4 max-w-3xl mx-auto w-full">
+            <div className="relative rounded-lg overflow-hidden shadow-level3 border border-brand-navy-mid bg-black max-h-[65vh] flex items-center justify-center">
+              <img
+                src={picture.path}
+                alt={picture.title}
+                className="max-h-[62vh] w-auto object-contain select-none pointer-events-none"
+                onContextMenu={(e) => e.preventDefault()}
+              />
             </div>
           </div>
 
-          {/* Picture Box */}
-          <div className="relative w-full max-w-2xl bg-black rounded-3xl overflow-hidden border-2 border-olive-600/80 shadow-2xl shadow-olive-950 flex items-center justify-center min-h-[380px] max-h-[65vh]">
-            <img
-              src={picture.path}
-              alt={picture.title}
-              className="max-h-[62vh] w-auto object-contain select-none"
-              onContextMenu={(e) => e.preventDefault()}
-            />
-
-            {/* Timer Badge Floating */}
-            <div className="absolute top-4 right-4 px-4 py-2 rounded-2xl bg-black/80 backdrop-blur-md border border-olive-500/80 flex items-center gap-2 shadow-xl">
-              <Clock className="w-4 h-4 text-camo-gold animate-spin" style={{ animationDuration: '4s' }} />
-              <span className="font-mono font-black text-xl text-white tracking-widest">
-                {String(timeLeft).padStart(2, '0')}s
-              </span>
+          {/* Bottom Countdown & Progress on Navy */}
+          <div className="max-w-md mx-auto w-full text-center space-y-2">
+            <div
+              className={`font-sans text-[44px] font-semibold tracking-tight transition-colors ${
+                timeLeft <= 5 ? 'text-brand-orange animate-pulse' : 'text-on-dark'
+              }`}
+            >
+              {timeLeft}s
             </div>
-          </div>
 
-          <div className="w-full max-w-2xl text-center space-y-1">
-            <div className="text-xs sm:text-sm font-semibold text-olive-200">
-              {lang === 'hi' ? 'पात्र, उनकी आयु, मनोदशा और परिवेश का अवलोकन करें' : 'Observe characters, mood, setting, and potential action'}
+            {/* Progress bar: brand-navy-mid track with brand-purple-300 fill; last seconds orange */}
+            <div className="w-full bg-brand-navy-mid h-2 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-250 rounded-full ${
+                  timeLeft <= 5 ? 'bg-brand-orange' : 'bg-brand-purple-300'
+                }`}
+                style={{ width: `${(timeLeft / PICTURE_DURATION_SEC) * 100}%` }}
+              />
             </div>
-            <p className="text-xs text-[#a8baa3]">
-              {lang === 'hi' 
-                ? 'समय समाप्त होने पर स्वतः 4 मिनट का लेखन टाइमर शुरू होगा' 
-                : 'Writing timer starts automatically when 30s expires'}
+
+            <p className="text-[12px] text-on-dark-muted uppercase tracking-wider pt-1">
+              Writing timer will begin automatically
             </p>
           </div>
         </div>
       )}
 
-      {/* PHASE 2: 4-MINUTE WRITING TIMER (Focus Mode) */}
+      {/* ========================================================
+          PHASE 2: 4-MINUTE WRITING TIMER (Focus Mode, Brand Navy)
+         ======================================================== */}
       {step === 'writing' && (
-        <div className="w-full min-h-[85vh] flex flex-col items-center justify-center space-y-6 animate-fade-in py-4 max-w-2xl">
-          <div className="w-full flex items-center justify-between px-2">
-            <button
-              onClick={handleExit}
-              className="px-3 py-1.5 rounded-lg border border-red-900/60 bg-red-950/40 text-red-300 hover:text-white hover:bg-red-900/60 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-            >
-              <X className="w-3.5 h-3.5" />
+        <div className="fixed inset-0 z-50 bg-brand-navy text-on-dark flex flex-col justify-between p-6 sm:p-10 select-none">
+          {/* Top Bar inside focus screen */}
+          <div className="flex items-center justify-between max-w-2xl mx-auto w-full">
+            <Button variant="secondary-on-dark" onClick={handleExit} className="text-[13px] py-1.5 px-3">
+              <X className="w-3.5 h-3.5 mr-1.5" />
               <span>Exit Practice</span>
-            </button>
+            </Button>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold text-olive-300 px-2 py-1 rounded bg-olive-950 border border-olive-800">
-                {pictureTitle}
-              </span>
-              <button
-                onClick={() => setSoundEnabled(!soundEnabled)}
-                className="p-1.5 rounded-lg bg-olive-950 border border-olive-800 text-gray-300 hover:text-white"
-                title="Toggle Sound"
-              >
-                {soundEnabled ? <Volume2 className="w-4 h-4 text-camo-gold" /> : <VolumeX className="w-4 h-4 text-gray-500" />}
-              </button>
-            </div>
+            <span className="text-[12px] font-semibold text-on-dark-muted uppercase tracking-widest">
+              Phase 2 · 4-Minute Story Writing
+            </span>
+
+            <Button
+              variant="ghost"
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              className="text-on-dark hover:bg-white/10"
+              title="Toggle Sound"
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4 text-brand-purple-300" /> : <VolumeX className="w-4 h-4 text-on-dark-muted" />}
+            </Button>
           </div>
 
-          {/* Huge Timer Display */}
-          <div className="w-full p-8 rounded-3xl bg-[#111710] border-2 border-olive-700/80 shadow-2xl text-center space-y-4">
-            <div className="text-xs font-bold text-olive-300 uppercase tracking-widest">
-              {lang === 'hi' ? 'कहानी लेखन समय' : 'Story Writing Time Remaining'}
-            </div>
+          {/* Central Large Timer Numerals on Navy */}
+          <div className="flex-1 flex flex-col items-center justify-center max-w-lg mx-auto w-full text-center space-y-6">
+            <div className="space-y-3">
+              <div className="text-[13px] font-semibold uppercase tracking-widest text-on-dark-muted">
+                Time Remaining on Paper
+              </div>
 
-            <div
-              className={`font-mono text-6xl sm:text-7xl font-black tracking-tight transition-colors duration-300 ${
-                timeLeft <= 30
-                  ? 'text-red-400 animate-pulse'
-                  : timeLeft <= 60
-                  ? 'text-amber-400'
-                  : 'text-white'
-              }`}
-            >
-              {formatTime(timeLeft)}
-            </div>
-
-            {/* Time progress bar */}
-            <div className="w-full bg-[#182317] h-3 rounded-full overflow-hidden border border-olive-800/80">
+              {/* Very large white numerals in sans-serif; switches to brand-orange in last 30s */}
               <div
-                className={`h-full transition-all duration-300 ${
+                className={`font-sans text-[72px] sm:text-[88px] font-semibold tracking-tight transition-colors ${
                   timeLeft <= 30
-                    ? 'bg-red-500'
-                    : timeLeft <= 60
-                    ? 'bg-amber-500'
-                    : 'bg-gradient-to-r from-olive-500 to-camo-gold'
+                    ? 'text-brand-orange animate-pulse'
+                    : 'text-on-dark'
+                }`}
+              >
+                {formatTime(timeLeft)}
+              </div>
+            </div>
+
+            {/* Progress bar: brand-navy-mid track with brand-purple-300 fill */}
+            <div className="w-full bg-brand-navy-mid h-2.5 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-300 rounded-full ${
+                  timeLeft <= 30 ? 'bg-brand-orange' : 'bg-brand-purple-300'
                 }`}
                 style={{ width: `${(timeLeft / WRITING_DURATION_SEC) * 100}%` }}
               />
             </div>
 
-            <p className="text-xs text-[#a8baa3] pt-1">
-              {timeLeft > 0
-                ? (lang === 'hi' ? 'कागज पर पेन से लिखें। 10-75-15 संरचना का पालन करें।' : 'Writing on real paper. Follow the 10-75-15 rule.')
-                : (lang === 'hi' ? 'समय समाप्त! नीचे बटन दबाकर फोटो अपलोड करें।' : 'Time complete! Proceed to upload your handwritten sheet.')}
-            </p>
-          </div>
-
-          {/* 10-75-15 Structure Checklist */}
-          <div className="w-full p-5 rounded-2xl bg-[#0e140d] border border-olive-800/70 text-xs sm:text-sm space-y-2 text-[#a8baa3]">
-            <div className="font-bold text-white text-xs uppercase tracking-wider text-camo-gold">
-              {lang === 'hi' ? 'कथा संरचना रिमाइंडर:' : 'Story Structure Reminder:'}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
-              <div className="p-2.5 rounded-lg bg-olive-950 border border-olive-900">
-                <strong className="text-white block">10% Setup</strong>
-                {lang === 'hi' ? 'पात्र, आयु, क्या स्थिति बनी' : 'Who, age, background context'}
+            {/* Structure reminder card */}
+            <div className="w-full p-4 rounded-lg bg-brand-navy-deep border border-brand-navy-mid text-[13px] text-on-dark-muted grid grid-cols-3 gap-2 text-center">
+              <div>
+                <strong className="text-on-dark block font-semibold">10% Setup</strong>
+                <span>Who &amp; Context</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-olive-950 border border-olive-900">
-                <strong className="text-white block">75% Action</strong>
-                {lang === 'hi' ? 'तार्किक कदम, कार्य, टीमवर्क' : 'Concrete execution steps & 4Ds'}
+              <div className="border-x border-brand-navy-mid px-2">
+                <strong className="text-on-dark block font-semibold">75% Action</strong>
+                <span>Direct 4Ds &amp; Effort</span>
               </div>
-              <div className="p-2.5 rounded-lg bg-olive-950 border border-olive-900">
-                <strong className="text-white block">15% Resolution</strong>
-                {lang === 'hi' ? 'सकारात्मक तार्किक समाधान' : 'Practical positive conclusion'}
+              <div>
+                <strong className="text-on-dark block font-semibold">15% Resolution</strong>
+                <span>Earned Outcome</span>
               </div>
             </div>
           </div>
 
-          {/* Next CTA: Upload Photo */}
-          <button
-            onClick={handleProceedToUpload}
-            className="w-full min-h-[50px] px-8 py-4 rounded-xl bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-500 hover:to-olive-400 text-white font-bold text-base shadow-2xl shadow-olive-950/80 transition-all flex items-center justify-center gap-2 group border border-olive-400/50"
-          >
-            <span>{lang === 'hi' ? 'हस्तलिखित कहानी का फोटो अपलोड करें' : 'Proceed to Photo Upload'}</span>
-            <span className="text-camo-gold group-hover:translate-x-1 transition-transform">&rarr;</span>
-          </button>
+          {/* Bottom Action: Proceed to Upload Button */}
+          <div className="max-w-md mx-auto w-full text-center pt-2">
+            <Button
+              variant="on-dark"
+              onClick={handleProceedToUpload}
+              fullWidth
+              className="text-[15px] py-3.5"
+            >
+              <span>{timeLeft <= 0 ? 'Time is up! Upload Photo' : 'Finished Writing? Proceed to Upload'}</span>
+              <span className="ml-2">&rarr;</span>
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -4,173 +4,180 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   BookOpen, 
-  Languages, 
-  CheckCircle2, 
-  AlertTriangle, 
   Lightbulb, 
-  Clock, 
   ArrowRight,
-  Shield,
-  Award
+  Shield, 
+  CheckCircle2, 
+  UserCheck, 
+  Target, 
+  Users
 } from 'lucide-react';
 import { SSB_GUIDE_DATA } from '@/data/ssbGuideContent';
 import { useLanguage } from '@/context/LanguageContext';
+import { 
+  CardBase, 
+  FeatureCard, 
+  PillTab, 
+  TagChip, 
+  Button 
+} from '@/components/ui';
 
 export default function GuidePage() {
-  const { lang, setLang } = useLanguage();
+  const { lang } = useLanguage();
   const [activeStageId, setActiveStageId] = useState<string>(SSB_GUIDE_DATA[0].id);
 
   const activeSection = SSB_GUIDE_DATA.find((s) => s.id === activeStageId) || SSB_GUIDE_DATA[0];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 w-full flex-1">
-      {/* Header with Title and Language Toggle */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-olive-800/60 mb-8">
-        <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-olive-900/60 border border-olive-700/60 text-camo-gold text-xs font-semibold mb-2">
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>
-              {lang === 'en' ? 'Comprehensive SSB Orientation Manual' : 'एसएसबी विस्तृत ओरिएंटेशन मार्गदर्शिका'}
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-4xl font-serif font-extrabold text-white">
-            {lang === 'en' ? 'The Five-Day SSB Procedure Guide' : 'पांच-दिवसीय एसएसबी चयन प्रक्रिया मार्गदर्शिका'}
-          </h1>
-          <p className="mt-1 text-sm sm:text-base text-[#a8baa3]">
-            {lang === 'en'
-              ? 'Stage-by-stage walkthrough authored with experienced Board Director & Assessor insights.'
-              : 'स्क्रीनिंग से लेकर कॉन्फ्रेंस तक हर चरण की विस्तृत जानकारी एवं परीक्षकों के गुप्त सुझाव।'}
-          </p>
-        </div>
-
-        {/* Big Language Toggle */}
-        <div className="flex items-center gap-2 self-start md:self-auto bg-[#131b12] p-1.5 rounded-xl border border-olive-700 shadow-md">
-          <button
-            onClick={() => setLang('en')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              lang === 'en'
-                ? 'bg-olive-600 text-white shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <span>English</span>
-          </button>
-          <button
-            onClick={() => setLang('hi')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              lang === 'hi'
-                ? 'bg-olive-600 text-white shadow-md'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            <span>हिंदी (Hindi)</span>
-          </button>
-        </div>
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full flex-1 space-y-10 text-ink">
+      {/* 1. Page Header */}
+      <div className="border-b border-hairline pb-6">
+        <h1 className="text-[32px] md:text-[36px] font-semibold text-ink tracking-tight">
+          {lang === 'en' ? 'The Five-Day SSB Procedure Guide' : 'पांच-दिवसीय एसएसबी चयन प्रक्रिया मार्गदर्शिका'}
+        </h1>
+        <p className="mt-2 text-[18px] text-slate leading-relaxed max-w-3xl font-normal">
+          {lang === 'en'
+            ? 'Complete stage-by-stage orientation manual covering Screening, Psychological Testing, GTO tasks, and Personal Interviews.'
+            : 'स्क्रीनिंग, मनोवैज्ञानिक परीक्षण, जीटीओ कार्य एवं व्यक्तिगत साक्षात्कार की सम्पूर्ण चरणबद्ध जानकारी।'}
+        </p>
       </div>
 
-      {/* Main Grid: Stages Navigation + Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Stages Sidebar */}
-        <div className="lg:col-span-1 space-y-2">
-          <div className="text-xs font-bold text-olive-400 uppercase tracking-wider mb-2 px-1">
-            {lang === 'en' ? 'SSB Stages' : 'एसएसबी के चरण'}
+      {/* 2. Stage Cards (Two tinted cards: Stage I sky, Stage II lavender) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Stage I Card (Sky) */}
+        <FeatureCard tint="sky" className="flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <TagChip color="purple">DAY 1</TagChip>
+              <span className="text-[13px] font-semibold text-charcoal">Filter Rate: ~60% Screened Out</span>
+            </div>
+            <h3 className="text-[24px] font-semibold text-ink">
+              {lang === 'en' ? 'Stage I: Screening' : 'स्टेज I: स्क्रीनिंग'}
+            </h3>
+            <p className="text-[15px] text-charcoal mt-2 leading-relaxed">
+              {lang === 'en'
+                ? 'Officers Intelligence Rating (OIR) test followed by Picture Perception & Description Test (PPDT). Gateway to the remaining 4 days.'
+                : 'ऑफिसर्स इंटेलिजेंस रेटिंग (OIR) एवं पिक्चर परसेप्शन एंड डिस्क्रिप्शन टेस्ट (PPDT)। बाकी 4 दिनों के लिए मुख्य द्वार।'}
+            </p>
           </div>
+          <div className="mt-6 pt-4 border-t border-hairline flex items-center justify-between">
+            <span className="text-[13px] text-slate">Key tests: OIR, PPDT Story, Group Discussion</span>
+            <Link href="/practice">
+              <Button variant="link">Practise PPDT &rarr;</Button>
+            </Link>
+          </div>
+        </FeatureCard>
+
+        {/* Stage II Card (Lavender) */}
+        <FeatureCard tint="lavender" className="flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <TagChip color="orange">DAYS 2 TO 5</TagChip>
+              <span className="text-[13px] font-semibold text-charcoal">Comprehensive Assessment</span>
+            </div>
+            <h3 className="text-[24px] font-semibold text-ink">
+              {lang === 'en' ? 'Stage II: Detailed Testing' : 'स्टेज II: विस्तृत मूल्यांकन'}
+            </h3>
+            <p className="text-[15px] text-charcoal mt-2 leading-relaxed">
+              {lang === 'en'
+                ? 'Psychological Tests (TAT, WAT, SRT, SDT), 9 Group Testing Officer (GTO) tasks, Personal Interview, and the Final Board Conference.'
+                : 'मनोवैज्ञानिक परीक्षण (TAT, WAT, SRT, SDT), 9 जीटीओ ग्राउंड टास्क, व्यक्तिगत साक्षात्कार और अंतिम बोर्ड कॉन्फ्रेंस।'}
+            </p>
+          </div>
+          <div className="mt-6 pt-4 border-t border-hairline flex items-center justify-between">
+            <span className="text-[13px] text-slate">Key tests: Psychology, GTO, Interview, Conference</span>
+            <Link href="/wat">
+              <Button variant="link">Practise WAT &rarr;</Button>
+            </Link>
+          </div>
+        </FeatureCard>
+      </div>
+
+      {/* 3. Day Navigation: Pill Tabs */}
+      <div className="space-y-4">
+        <div className="text-[13px] font-semibold text-steel uppercase tracking-wider">
+          {lang === 'en' ? 'Select a day to inspect' : 'दिन चुनें'}
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5 pb-2 border-b border-hairline">
           {SSB_GUIDE_DATA.map((section) => {
             const isActive = section.id === activeStageId;
             return (
-              <button
+              <PillTab
                 key={section.id}
+                active={isActive}
                 onClick={() => setActiveStageId(section.id)}
-                className={`w-full text-left p-3.5 rounded-xl border transition-all flex flex-col ${
-                  isActive
-                    ? 'bg-olive-800/90 border-olive-500 text-white shadow-lg shadow-olive-950/50'
-                    : 'bg-[#111710] border-olive-900/80 text-gray-300 hover:border-olive-700 hover:bg-olive-950/60'
-                }`}
               >
-                <span className={`text-[11px] font-bold ${isActive ? 'text-camo-gold' : 'text-olive-400'}`}>
-                  {section.day}
+                <span>{section.day}</span>
+                <span className="text-steel font-normal ml-1 hidden sm:inline">
+                  · {lang === 'en' ? section.titleEn.split(':')[0] : section.titleHi.split(':')[0]}
                 </span>
-                <span className="font-semibold text-sm mt-0.5 line-clamp-1">
-                  {lang === 'en' ? section.titleEn : section.titleHi}
-                </span>
-              </button>
+              </PillTab>
             );
           })}
-
-          {/* Quick practice card */}
-          <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-olive-950 to-[#0c130b] border border-olive-800 text-xs">
-            <h4 className="font-bold text-white mb-1 flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-camo-gold" />
-              {lang === 'en' ? 'Ready to Practice PPDT?' : 'PPDT अभ्यास शुरू करें'}
-            </h4>
-            <p className="text-gray-300 text-[11px] mb-3">
-              {lang === 'en'
-                ? 'Test your story writing against exam-style 30s picture & 4m writing timers.'
-                : '30 सेकंड चित्र और 4 मिनट टाइमर के साथ वास्तविक परीक्षा माहौल में अभ्यास करें।'}
-            </p>
-            <Link
-              href="/practice"
-              className="block text-center py-2 px-3 rounded-lg bg-olive-600 hover:bg-olive-500 text-white font-bold text-xs transition-colors shadow"
-            >
-              {lang === 'en' ? 'Launch Simulator' : 'सिम्युलेटर शुरू करें'}
-            </Link>
-          </div>
         </div>
+      </div>
 
-        {/* Content Details */}
-        <div className="lg:col-span-3 space-y-6">
-          {/* Active Stage Header Card */}
-          <div className="p-6 rounded-2xl bg-[#121911] border border-olive-800 shadow-xl">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-olive-900 text-camo-gold text-xs font-bold border border-olive-700">
-                {activeSection.day}
-              </span>
-              <span className="text-xs text-olive-300 font-semibold px-2.5 py-0.5 rounded-md bg-olive-950/80 border border-olive-800">
+      {/* 4. Active Day Card-Base */}
+      <CardBase className="space-y-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-hairline">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="font-semibold text-[13px] text-steel">{activeSection.day}</span>
+              <TagChip color={activeSection.id === 'stage-1' ? 'purple' : 'orange'}>
                 {lang === 'en' ? activeSection.tagEn : activeSection.tagHi}
-              </span>
+              </TagChip>
             </div>
-
-            <h2 className="text-2xl sm:text-3xl font-serif font-extrabold text-white mt-2">
+            <h2 className="text-[26px] font-semibold text-ink">
               {lang === 'en' ? activeSection.titleEn : activeSection.titleHi}
             </h2>
-
-            <p className="mt-3 text-base text-gray-200 leading-relaxed">
-              {lang === 'en' ? activeSection.summaryEn : activeSection.summaryHi}
-            </p>
           </div>
 
-          {/* Tests in this stage */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-olive-300 uppercase tracking-wider px-1">
-              {lang === 'en' ? 'Tests & Procedures' : 'परीक्षण एवं प्रक्रियाएं'}
-            </h3>
+          <Link href="/practice">
+            <Button variant="secondary">
+              <span>Start Simulator</span>
+              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            </Button>
+          </Link>
+        </div>
 
+        <p className="text-[16px] text-charcoal leading-relaxed">
+          {lang === 'en' ? activeSection.summaryEn : activeSection.summaryHi}
+        </p>
+
+        {/* Tests List in this Day */}
+        <div className="space-y-4 pt-4 border-t border-hairline">
+          <h3 className="text-[16px] font-semibold text-ink uppercase tracking-wider">
+            {lang === 'en' ? 'Scheduled Procedures & Tests' : 'निर्धारित परीक्षण एवं प्रक्रियाएं'}
+          </h3>
+
+          <div className="grid grid-cols-1 gap-4">
             {activeSection.tests.map((test, idx) => (
               <div
                 key={idx}
-                className="p-5 rounded-2xl bg-[#111710] border border-olive-800/80 hover:border-olive-700 transition-colors shadow-md space-y-4"
+                className="p-5 rounded-md border border-hairline bg-surface/50 hover:bg-surface transition-colors space-y-3"
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-olive-800 flex items-center justify-center text-xs font-bold text-camo-gold">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 rounded-md bg-canvas border border-hairline flex items-center justify-center text-[12px] font-bold text-ink shrink-0 mt-0.5">
                     {idx + 1}
+                  </span>
+                  <div>
+                    <h4 className="text-[17px] font-semibold text-ink">
+                      {lang === 'en' ? test.nameEn : test.nameHi}
+                    </h4>
+                    <p className="text-[14px] text-charcoal mt-1 leading-relaxed">
+                      {lang === 'en' ? test.detailsEn : test.detailsHi}
+                    </p>
                   </div>
-                  <h4 className="text-lg font-bold text-white">
-                    {lang === 'en' ? test.nameEn : test.nameHi}
-                  </h4>
                 </div>
 
-                <p className="text-xs sm:text-sm text-gray-300 leading-relaxed pl-9">
-                  {lang === 'en' ? test.detailsEn : test.detailsHi}
-                </p>
-
-                {/* Assessor Tip Box */}
-                <div className="ml-9 p-3.5 rounded-xl bg-olive-950/90 border border-olive-700/60 flex items-start gap-3 text-xs leading-relaxed">
-                  <Lightbulb className="w-4 h-4 text-camo-gold shrink-0 mt-0.5" />
+                {/* Assessor Tip in clean card-tint-cream */}
+                <div className="ml-9 p-3 rounded-md bg-card-tint-cream border border-hairline flex items-start gap-2.5 text-[13px] leading-relaxed">
+                  <Lightbulb className="w-4 h-4 text-brand-orange shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-camo-gold font-bold">
-                      {lang === 'en' ? "Assessor's Secret Guidance: " : "परीक्षक का गुप्त सुझाव: "}
+                    <strong className="text-charcoal font-semibold">
+                      {lang === 'en' ? 'Assessor Guidance: ' : 'परीक्षक का सुझाव: '}
                     </strong>
-                    <span className="text-olive-200">
+                    <span className="text-charcoal">
                       {lang === 'en' ? test.assessorTipEn : test.assessorTipHi}
                     </span>
                   </div>
@@ -178,30 +185,74 @@ export default function GuidePage() {
               </div>
             ))}
           </div>
-
-          {/* Footer Callout */}
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-olive-900/60 via-[#152014] to-olive-900/60 border border-olive-700/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h4 className="font-heading font-bold text-lg text-white">
-                {lang === 'en' ? 'PPDT is the Gateway to Stage 2' : 'PPDT ही स्टेज 2 का मुख्य द्वार है'}
-              </h4>
-              <p className="text-xs text-gray-300 mt-0.5">
-                {lang === 'en'
-                  ? 'More than 60% of candidates get screened out on Day 1. Start your practice now.'
-                  : 'लगभग 60% अभ्यर्थी पहले दिन ही बाहर हो जाते हैं। आज ही समयबद्ध अभ्यास शुरू करें।'}
-              </p>
-            </div>
-            <Link
-              href="/practice"
-              className="px-5 py-2.5 rounded-xl bg-olive-600 hover:bg-olive-500 text-white font-bold text-xs sm:text-sm shadow-lg transition-all flex items-center gap-1.5 shrink-0"
-            >
-              <span>{lang === 'en' ? 'Start Practice' : 'अभ्यास प्रारंभ करें'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
         </div>
+      </CardBase>
+
+      {/* 5. "Who Assesses You" as Three Small Cards */}
+      <section className="space-y-4 pt-4">
+        <div>
+          <h3 className="text-[22px] font-semibold text-ink">
+            {lang === 'en' ? 'The Three Independent Assessors' : 'तीन स्वतंत्र परीक्षक'}
+          </h3>
+          <p className="text-[14px] text-slate mt-1">
+            Every candidate is assessed independently through three distinct lenses without consulting until the conference.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CardBase>
+            <div className="w-9 h-9 rounded-md bg-card-tint-lavender text-brand-purple-800 flex items-center justify-center mb-3">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <h4 className="text-[17px] font-semibold text-ink">1. The Psychologist</h4>
+            <p className="text-[14px] text-charcoal mt-1.5 leading-relaxed">
+              Evaluates the subconscious mind through written projections: TAT stories, 60 WAT sentences, 60 SRTs, and Self-Description.
+            </p>
+          </CardBase>
+
+          <CardBase>
+            <div className="w-9 h-9 rounded-md bg-card-tint-peach text-brand-orange-deep flex items-center justify-center mb-3">
+              <Users className="w-5 h-5" />
+            </div>
+            <h4 className="text-[17px] font-semibold text-ink">2. The GTO</h4>
+            <p className="text-[14px] text-charcoal mt-1.5 leading-relaxed">
+              Observes physical dynamism, team behavior, leadership, and spontaneous cooperation across 9 ground and obstacle tasks.
+            </p>
+          </CardBase>
+
+          <CardBase>
+            <div className="w-9 h-9 rounded-md bg-card-tint-sky text-link-blue flex items-center justify-center mb-3">
+              <Target className="w-5 h-5" />
+            </div>
+            <h4 className="text-[17px] font-semibold text-ink">3. Interviewing Officer</h4>
+            <p className="text-[14px] text-charcoal mt-1.5 leading-relaxed">
+              Senior officer (President/Deputy President) conducting a 35 to 60 minute one-on-one interview exploring life decisions, family, and GK.
+            </p>
+          </CardBase>
+        </div>
+      </section>
+
+      {/* 6. "What is Assessed" as Yellow Card */}
+      <FeatureCard tint="yellow" className="space-y-3">
+        <h3 className="text-[20px] font-semibold text-ink">
+          {lang === 'en' ? 'What is Assessed: 15 Officer Like Qualities (OLQs)' : 'क्या जांचा जाता है: 15 ऑफिसर लाइक क्वालिटीज'}
+        </h3>
+        <p className="text-[15px] text-charcoal leading-relaxed">
+          The SSB tests core personality traits grouped into 4 factors: <strong>Factor 1: Planning and Organizing</strong> (Effective Intelligence, Reasoning, Organizing, Expression); <strong>Factor 2: Social Adjustment</strong> (Social Adaptability, Cooperation, Sense of Responsibility); <strong>Factor 3: Social Effectiveness</strong> (Initiative, Self Confidence, Decision Making, Liveliness, Influence); and <strong>Factor 4: Dynamic</strong> (Determination, Courage, Stamina).
+        </p>
+        <div className="pt-2">
+          <Link href="/practice">
+            <Button variant="dark">
+              Practise PPDT with OLQ Feedback
+            </Button>
+          </Link>
+        </div>
+      </FeatureCard>
+
+      {/* 7. Disclaimer as a Quiet Note in Slate */}
+      <div className="text-[13px] text-slate pt-2 border-t border-hairline">
+        Disclaimer: This guide is intended for orientation and practice guidance. SSB selection criteria and ground arrangements are governed strictly by the respective Service Selection Boards (Army, Navy, Air Force, Coast Guard).
       </div>
     </div>
   );
 }
-
