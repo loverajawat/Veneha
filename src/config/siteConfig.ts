@@ -271,6 +271,24 @@ export const siteConfig = {
     },
   },
 
+  nav: {
+    todayProgress: {
+      en: 'Today Progress',
+      hi: 'आज की प्रगति',
+    },
+    limitReached: {
+      en: 'Limit reached',
+      hi: 'दैनिक सीमा समाप्त',
+    },
+    left: {
+      en: 'left',
+      hi: 'शेष',
+    },
+    resetsMidnight: {
+      en: 'Resets daily at midnight.',
+      hi: 'प्रतिदिन आधी रात को रीसेट होता है।',
+    },
+  },
   navItems: [
     {
       id: 'home',

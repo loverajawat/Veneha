@@ -45,3 +45,4 @@ export function SegmentedTab({ active, onClick, children, className = '' }: Segm
     </button>
   );
 }
+

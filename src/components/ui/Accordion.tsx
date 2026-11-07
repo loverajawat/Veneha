@@ -35,3 +35,4 @@ export function AccordionItem({ question, children, defaultOpen = false, classNa
     </div>
   );
 }
+

@@ -43,3 +43,4 @@ export function TagChip({ color = 'purple', className = '', children, ...props }
     </span>
   );
 }
+

@@ -65,3 +65,4 @@ export function YellowBoldBanner({ className = '', children, ...props }: React.H
     </div>
   );
 }
+

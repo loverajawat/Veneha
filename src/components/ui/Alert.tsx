@@ -39,3 +39,4 @@ export function Alert({ type = 'warning', title, children, className = '' }: Ale
 export function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse bg-card-tint-gray rounded-md ${className}`} />;
 }
+
