@@ -365,3 +365,91 @@ export const OLQ_FACTORS: OLQItem[] = [
   }
 ];
 
+export interface OLQFactorStructured {
+  id: string;
+  titleEn: string;
+  titleHi: string;
+  qualitiesEn: string[];
+  qualitiesHi: string[];
+}
+
+export const OLQ_FACTORS_STRUCTURED: OLQFactorStructured[] = [
+  {
+    id: "factor-1",
+    titleEn: "Factor 1: Planning and Organizing",
+    titleHi: "कारक 1: योजना और संगठन (Factor 1: Planning and Organizing)",
+    qualitiesEn: [
+      "Effective Intelligence",
+      "Reasoning",
+      "Organizing",
+      "Expression",
+    ],
+    qualitiesHi: [
+      "प्रभावी बुद्धिमत्ता (Effective Intelligence)",
+      "तार्किक क्षमता (Reasoning)",
+      "संगठन क्षमता (Organizing)",
+      "अभिव्यक्ति की क्षमता (Expression)",
+    ],
+  },
+  {
+    id: "factor-2",
+    titleEn: "Factor 2: Social Adjustment",
+    titleHi: "कारक 2: सामाजिक सामंजस्य (Factor 2: Social Adjustment)",
+    qualitiesEn: [
+      "Social Adaptability",
+      "Cooperation",
+      "Sense of Responsibility",
+    ],
+    qualitiesHi: [
+      "सामाजिक अनुकूलनशीलता (Social Adaptability)",
+      "सहयोग की भावना (Cooperation)",
+      "जिम्मेदारी की भावना (Sense of Responsibility)",
+    ],
+  },
+  {
+    id: "factor-3",
+    titleEn: "Factor 3: Social Effectiveness",
+    titleHi: "कारक 3: सामाजिक प्रभावशीलता (Factor 3: Social Effectiveness)",
+    qualitiesEn: [
+      "Initiative",
+      "Self Confidence",
+      "Decision Making",
+      "Liveliness",
+      "Influence",
+    ],
+    qualitiesHi: [
+      "पहल करने की क्षमता (Initiative)",
+      "आत्मविश्वास (Self Confidence)",
+      "त्वरित निर्णय क्षमता (Decision Making)",
+      "सजीवता एवं उत्साह (Liveliness)",
+      "समूह को प्रभावित करने की क्षमता (Influence)",
+    ],
+  },
+  {
+    id: "factor-4",
+    titleEn: "Factor 4: Dynamic",
+    titleHi: "कारक 4: जुझारू क्षमता (Factor 4: Dynamic)",
+    qualitiesEn: [
+      "Determination",
+      "Courage",
+      "Stamina",
+    ],
+    qualitiesHi: [
+      "दृढ़ निश्चय (Determination)",
+      "साहस (Courage)",
+      "सहनशीलता एवं ऊर्जा (Stamina)",
+    ],
+  },
+];
+
+export const OLQ_SECTION_DATA = {
+  headingEn: "What is Assessed: 15 Officer Like Qualities (OLQs)",
+  headingHi: "क्या जांचा जाता है: 15 ऑफिसर लाइक क्वालिटीज (OLQs)",
+  introEn: "The SSB tests core personality traits grouped into 4 factors:",
+  introHi: "एसएसबी में व्यक्तित्व के मूल गुणों को 4 कारकों में समूहीकृत कर परखा जाता है:",
+  factors: OLQ_FACTORS_STRUCTURED,
+  ctaEn: "Practise PPDT with OLQ Feedback",
+  ctaHi: "OLQ फीडबैक के साथ PPDT अभ्यास करें",
+};
+
+

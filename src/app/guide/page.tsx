@@ -12,7 +12,7 @@ import {
   Target, 
   Users
 } from 'lucide-react';
-import { SSB_GUIDE_DATA } from '@/data/ssbGuideContent';
+import { SSB_GUIDE_DATA, OLQ_SECTION_DATA } from '@/data/ssbGuideContent';
 import { useLanguage } from '@/context/LanguageContext';
 import { 
   CardBase, 
@@ -233,17 +233,49 @@ export default function GuidePage() {
       </section>
 
       {/* 6. "What is Assessed" as Yellow Card */}
-      <FeatureCard tint="yellow" className="space-y-3">
+      <FeatureCard tint="yellow" className="space-y-4">
         <h3 className="text-[20px] font-semibold text-ink">
-          {lang === 'en' ? 'What is Assessed: 15 Officer Like Qualities (OLQs)' : 'क्या जांचा जाता है: 15 ऑफिसर लाइक क्वालिटीज'}
+          {lang === 'en' ? OLQ_SECTION_DATA.headingEn : OLQ_SECTION_DATA.headingHi}
         </h3>
-        <p className="text-[15px] text-charcoal leading-relaxed">
-          The SSB tests core personality traits grouped into 4 factors: <strong>Factor 1: Planning and Organizing</strong> (Effective Intelligence, Reasoning, Organizing, Expression); <strong>Factor 2: Social Adjustment</strong> (Social Adaptability, Cooperation, Sense of Responsibility); <strong>Factor 3: Social Effectiveness</strong> (Initiative, Self Confidence, Decision Making, Liveliness, Influence); and <strong>Factor 4: Dynamic</strong> (Determination, Courage, Stamina).
+
+        <p className="text-[15px] sm:text-[16px] text-charcoal">
+          {lang === 'en' ? OLQ_SECTION_DATA.introEn : OLQ_SECTION_DATA.introHi}
         </p>
-        <div className="pt-2">
+
+        {/* Top-to-bottom ordered list of 4 factors */}
+        <ol className="space-y-5 list-none pl-0" role="list">
+          {OLQ_SECTION_DATA.factors.map((factor, factorIdx) => {
+            const factorTitle = lang === 'en' ? factor.titleEn : factor.titleHi;
+            const factorQualities = lang === 'en' ? factor.qualitiesEn : factor.qualitiesHi;
+
+            return (
+              <li 
+                key={factor.id} 
+                role="listitem"
+                className={`space-y-2.5 ${factorIdx > 0 ? 'pt-4 border-t border-hairline/60' : ''}`}
+              >
+                <div className="text-[17px] sm:text-[18px] font-bold text-ink">
+                  {factorTitle}
+                </div>
+                <ul 
+                  className="space-y-1.5 pl-5 list-disc text-[16px] text-charcoal leading-[1.6] marker:text-charcoal" 
+                  role="list"
+                >
+                  {factorQualities.map((quality, qIdx) => (
+                    <li key={qIdx} role="listitem" className="pl-1">
+                      {quality}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
+        </ol>
+
+        <div className="pt-2 mt-6">
           <Link href="/practice">
             <Button variant="dark">
-              Practise PPDT with OLQ Feedback
+              {lang === 'en' ? OLQ_SECTION_DATA.ctaEn : OLQ_SECTION_DATA.ctaHi}
             </Button>
           </Link>
         </div>
