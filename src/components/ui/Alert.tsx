@@ -1,7 +1,7 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle, AlertCircle } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, AlertCircle, Info } from 'lucide-react';
 
-export type AlertType = 'success' | 'warning' | 'error';
+export type AlertType = 'success' | 'warning' | 'error' | 'info';
 
 interface AlertProps {
   type?: AlertType;
@@ -23,6 +23,10 @@ export function Alert({ type = 'warning', title, children, className = '' }: Ale
     borderClass = 'border-semantic-error bg-card-tint-rose/60 text-charcoal';
     Icon = AlertCircle;
     iconColor = 'text-semantic-error';
+  } else if (type === 'info') {
+    borderClass = 'border-hairline-strong bg-card-tint-sky/60 text-charcoal';
+    Icon = Info;
+    iconColor = 'text-link-blue';
   }
 
   return (

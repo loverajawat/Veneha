@@ -4,19 +4,36 @@ export function getApiKey(customKey?: string | null): string | undefined {
   return customKey || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 }
 
+export interface StoryPageImage {
+  base64: string;
+  mimeType: string;
+}
+
 /**
- * Transcribes handwritten story image using Gemini multimodal API
+ * Transcribes handwritten story image(s) using Gemini multimodal API.
+ * Supports a single image or an ordered array of 1 to 4 pages.
  */
 export async function transcribeHandwrittenStory(
-  imageBase64: string,
-  mimeType: string,
-  customKey?: string | null
+  pagesInput: StoryPageImage[] | string,
+  mimeTypeOrCustomKey?: string | null,
+  customKeyParam?: string | null
 ): Promise<string> {
+  let pages: StoryPageImage[];
+  let customKey: string | null | undefined;
+
+  if (typeof pagesInput === 'string') {
+    pages = [{ base64: pagesInput, mimeType: mimeTypeOrCustomKey || 'image/jpeg' }];
+    customKey = customKeyParam;
+  } else {
+    pages = pagesInput;
+    customKey = mimeTypeOrCustomKey;
+  }
+
   const apiKey = getApiKey(customKey);
 
   if (!apiKey) {
-    // If no API key configured, provide a realistic simulated transcription demonstration
-    return `Perception Box:
+    if (pages.length <= 1) {
+      return `Perception Box:
 Characters: 2 (M-22, F-45) | Mood: Positive & Energetic | Title: Rural Solar Cold-Storage Initiative
 
 Story:
@@ -25,29 +42,48 @@ Rohan, a 22-year-old agricultural engineering student, noticed while visiting hi
 Determined to find an affordable solution, he met the village Sarpanch and proposed setting up a community-run solar cold storage unit using local warehouse space. He drafted a cost estimate and organized a meeting with local farmers to explain the economics and operational plan. With the Panchayat's approval, he coordinated with a renewable equipment vendor to source subsidized solar panels and lead-acid batteries. 
 
 He formed a youth team to help with physical mounting and trained two local technicians in basic maintenance. Within three weeks, the cold storage unit was commissioned, saving perishable produce for 45 families and increasing their market returns by 25%.`;
+    }
+
+    // Realistic multi-page fallback joining pages in order with blank lines
+    const pageSections = pages.map((_, idx) => {
+      if (idx === 0) {
+        return `Perception Box:\nCharacters: 2 (M-22, F-45) | Mood: Positive & Energetic | Title: Rural Solar Cold-Storage Initiative\n\nStory:\nRohan, a 22-year-old agricultural engineering student, noticed while visiting his ancestral village in Rewari that marginal vegetable farmers suffered significant post-harvest spoilage due to frequent power outages.\n\nDetermined to find an affordable solution, he met the village Sarpanch and proposed setting up a community-run solar cold storage unit using local warehouse space. He drafted a cost estimate and organized a meeting with local farmers to explain the economics.`;
+      } else if (idx === 1) {
+        return `With the Panchayat's formal approval, he coordinated with a renewable equipment vendor to source subsidized solar panels and lead-acid batteries. He formed a dedicated youth team to help with physical mounting and civil preparations at the site.\n\nHe conducted evening demonstrations to familiarize the village elders with temperature monitoring and basic maintenance routines.`;
+      } else {
+        return `Within three weeks, the cold storage unit was successfully commissioned. It preserved perishable harvest for 45 families, preventing distress selling and increasing collective household market earnings by 25%.`;
+      }
+    });
+
+    return pageSections.join('\n\n');
   }
 
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
+  let prompt = GEMINI_TRANSCRIPTION_PROMPT;
+  if (pages.length > 1) {
+    prompt += `\n\nThe images are consecutive pages of one handwritten story, given in order from page 1. Read them as one continuous story. Return a single transcript with the pages joined in order, with one blank line between pages. Do not repeat text, do not reorder it, and do not add or invent anything. If a word cannot be read, mark it as [unclear]. If a page has no readable writing, say so.`;
+  }
+
+  const parts: any[] = [{ text: prompt }];
+  for (const page of pages) {
+    parts.push({
+      inline_data: {
+        mime_type: page.mimeType,
+        data: page.base64,
+      },
+    });
+  }
+
   const payload = {
     contents: [
       {
-        parts: [
-          {
-            text: GEMINI_TRANSCRIPTION_PROMPT,
-          },
-          {
-            inline_data: {
-              mime_type: mimeType,
-              data: imageBase64,
-            },
-          },
-        ],
+        parts,
       },
     ],
     generationConfig: {
       temperature: 0.2,
-      maxOutputTokens: 1200,
+      maxOutputTokens: 2500,
     },
   };
 
