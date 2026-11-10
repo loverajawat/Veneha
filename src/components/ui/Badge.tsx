@@ -1,7 +1,7 @@
 import React from 'react';
 
 export type SolidBadgeColor = 'purple' | 'pink' | 'orange';
-export type TagBadgeColor = 'purple' | 'orange' | 'green' | 'gray';
+export type TagBadgeColor = 'purple' | 'orange' | 'green' | 'gray' | 'yellow' | 'red';
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   color?: SolidBadgeColor;
@@ -33,6 +33,8 @@ export function TagChip({ color = 'purple', className = '', children, ...props }
   if (color === 'orange') colorStyles = 'bg-card-tint-peach text-brand-orange-deep';
   if (color === 'green') colorStyles = 'bg-card-tint-mint text-brand-green';
   if (color === 'gray') colorStyles = 'bg-card-tint-gray text-slate';
+  if (color === 'yellow') colorStyles = 'bg-card-tint-yellow text-brand-orange-deep';
+  if (color === 'red') colorStyles = 'bg-card-tint-rose text-semantic-error';
 
   return (
     <span

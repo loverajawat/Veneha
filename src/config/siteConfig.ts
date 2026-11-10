@@ -138,8 +138,8 @@ export const siteConfig = {
         '4D ऑडिट (प्रत्यक्ष कार्य, निर्णय, कार्यभार, परिनियोजन)',
         'उन्नत मॉडल कहानी + नरेशन रणनीति सुझाव',
       ],
-      privacyEn: 'Handwriting image deleted immediately after transcription',
-      privacyHi: 'ट्रांसक्रिप्शन के तुरंत बाद हस्तलेखन चित्र हटा दिया जाता है',
+      privacyEn: "Your photos are not saved by Veneha. Your photos, your story and the practice picture are sent to Google's Gemini service to read and evaluate them.",
+      privacyHi: "आपकी तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं। आपकी तस्वीरें, आपकी कहानी और अभ्यास चित्र केवल पढ़ने और मूल्यांकन के लिए Google की जेमिनी सेवा को भेजे जाते हैं।",
       route: '/practice',
     },
   ],
@@ -338,5 +338,104 @@ export const siteConfig = {
       subLabelHi: 'इतिहास एवं AI फीडबैक',
     },
   ] as NavItemConfig[],
+  auth: {
+    signIn: {
+      en: 'Sign in',
+      hi: 'साइन इन करें',
+    },
+    createAccount: {
+      en: 'Create account',
+      hi: 'खाता बनाएं',
+    },
+    brandTagline: {
+      en: 'Practise PPDT and WAT under exam timing, with strict AI feedback.',
+      hi: 'परीक्षा समय सीमा में PPDT और WAT का अभ्यास करें, सख्त AI फीडबैक के साथ।',
+    },
+    privacyLine: {
+      en: 'Your handwriting photos are not saved by Veneha.',
+      hi: 'आपकी लिखावट की तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं।',
+    },
+    signInHeading: {
+      en: 'Sign in to Veneha',
+      hi: 'वेनेहा में साइन इन करें',
+    },
+    signInSubtitle: {
+      en: 'Use the email and password you signed up with.',
+      hi: 'अपने पंजीकृत ईमेल और पासवर्ड का उपयोग करें।',
+    },
+    createHeading: {
+      en: 'Create your Veneha account',
+      hi: 'अपना वेनेहा खाता बनाएं',
+    },
+    createSubtitle: {
+      en: 'It takes less than a minute.',
+      hi: 'इसमें एक मिनट से भी कम समय लगता है।',
+    },
+    fullName: {
+      en: 'Full name',
+      hi: 'पूरा नाम',
+    },
+    email: {
+      en: 'Email',
+      hi: 'ईमेल',
+    },
+    password: {
+      en: 'Password',
+      hi: 'पासवर्ड',
+    },
+    passwordHint: {
+      en: 'At least 8 characters',
+      hi: 'कम से कम 8 अक्षर',
+    },
+    showPassword: {
+      en: 'Show password',
+      hi: 'पासवर्ड दिखाएं',
+    },
+    hidePassword: {
+      en: 'Hide password',
+      hi: 'पासवर्ड छिपाएं',
+    },
+    ageAndTermsConsent: {
+      en: 'I am 18 or older and I agree to the Privacy note',
+      hi: 'मेरी आयु 18 वर्ष या उससे अधिक है और मैं गोपनीयता नोट से सहमत हूँ',
+    },
+    continueAsGuest: {
+      en: 'Continue as guest',
+      hi: 'अतिथि (Guest) के रूप में जारी रखें',
+    },
+    forgotPassword: {
+      en: 'Forgot password?',
+      hi: 'पासवर्ड भूल गए?',
+    },
+    guestClaimDialog: {
+      title: {
+        en: (count: number) => `Add your ${count} practice attempt${count !== 1 ? 's' : ''} from this browser to your account?`,
+        hi: (count: number) => `क्या आप इस ब्राउज़र के अपने ${count} अभ्यास प्रयासों को अपने खाते में जोड़ना चाहते हैं?`,
+      },
+      addThem: {
+        en: 'Add them',
+        hi: 'इन्हें जोड़ें',
+      },
+      notNow: {
+        en: 'Not now',
+        hi: 'अभी नहीं',
+      },
+    },
+    profileMenu: {
+      signOut: {
+        en: 'Sign out',
+        hi: 'साइन आउट',
+      },
+      signInOrCreate: {
+        en: 'Sign in or create account',
+        hi: 'साइन इन करें या खाता बनाएं',
+      },
+      editName: {
+        en: 'Edit name',
+        hi: 'नाम बदलें',
+      },
+    },
+  },
 };
+
 

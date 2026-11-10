@@ -829,35 +829,47 @@ export default function UploadPage() {
 
           {/* Bottom Action Row */}
           <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <TagChip color="green">
-              <Lock className="w-3 h-3 mr-1 inline" />
-              {lang === 'hi'
-                ? 'हस्तलिखित तस्वीरें ट्रांसक्रिप्शन के तुरंत बाद हटा दी जाती हैं'
-                : 'Handwriting photos are deleted immediately after transcription'}
-            </TagChip>
+            <div className="text-[12px] text-slate flex items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>
+                {lang === 'hi'
+                  ? 'आपकी तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं। आपकी तस्वीरें, आपकी कहानी और अभ्यास चित्र केवल पढ़ने और मूल्यांकन के लिए Google Gemini को भेजे जाते हैं।'
+                  : "Your photos are not saved by Veneha. Your photos, your story and the practice picture are sent to Google's Gemini service to read and evaluate them."}
+              </span>
+            </div>
 
-            <Button
-              variant="primary"
-              onClick={handleTranscribe}
-              disabled={pages.length === 0 || hasBlurryPage || transcribing}
-              className="w-full sm:w-auto"
-            >
-              {transcribing ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>{lang === 'hi' ? 'कहानी पढ़ी जा रही है...' : 'Reading Handwriting...'}</span>
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <span>
-                    {lang === 'hi'
-                      ? `कहानी ट्रांसक्राइब करें (${pages.length} पृष्ठ)`
-                      : `Transcribe Story (${pages.length} page${pages.length !== 1 ? 's' : ''})`}
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Button
+                variant="secondary"
+                onClick={() => setActiveTab('text')}
+                className="w-full sm:w-auto text-xs whitespace-nowrap"
+              >
+                {lang === 'hi' ? 'स्वयं टाइप करें' : 'Type my story instead'}
+              </Button>
+
+              <Button
+                variant="primary"
+                onClick={handleTranscribe}
+                disabled={pages.length === 0 || hasBlurryPage || transcribing}
+                className="w-full sm:w-auto"
+              >
+                {transcribing ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{lang === 'hi' ? 'कहानी पढ़ी जा रही है...' : 'Reading Handwriting...'}</span>
                   </span>
-                  <ArrowRight className="w-4 h-4" />
-                </span>
-              )}
-            </Button>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    <span>
+                      {lang === 'hi'
+                        ? `कहानी ट्रांसक्राइब करें (${pages.length} पृष्ठ)`
+                        : `Transcribe Story (${pages.length} page${pages.length !== 1 ? 's' : ''})`}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
 
           {errorMessage && (

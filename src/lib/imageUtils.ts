@@ -1,5 +1,7 @@
 'use client';
 
+import { TRANSCRIBER_CONFIG } from './transcriber/config';
+
 export interface BlurCheckResult {
   score: number;
   isBlurry: boolean;
@@ -120,8 +122,8 @@ export async function checkImageSharpness(file: File | Blob): Promise<BlurCheckR
 }
 
 /**
- * Compresses an image file client-side to max 1600px width/height and 85% JPEG quality.
- * Reduces 5-10MB mobile photos to ~200-400KB without losing handwriting legibility.
+ * Compresses an image file client-side to max 2000px width/height and 85% JPEG quality.
+ * Preserves high legibility for small handwriting. Never upscales smaller images.
  */
 export async function compressImage(file: File): Promise<{ base64: string; mimeType: string }> {
   return new Promise((resolve, reject) => {
@@ -132,8 +134,10 @@ export async function compressImage(file: File): Promise<{ base64: string; mimeT
         const canvas = document.createElement('canvas');
         let w = img.width;
         let h = img.height;
-        const maxDimension = 1600;
+        const maxDimension = TRANSCRIBER_CONFIG.MAX_LONG_EDGE_PX || 2000;
+        const quality = TRANSCRIBER_CONFIG.JPEG_QUALITY || 0.85;
 
+        // Downscale only if larger than maxDimension, never upscale
         if (w > maxDimension || h > maxDimension) {
           if (w > h) {
             h = Math.round((h * maxDimension) / w);
@@ -157,7 +161,7 @@ export async function compressImage(file: File): Promise<{ base64: string; mimeT
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
 
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
         const base64Data = dataUrl.split(',')[1];
         resolve({
           base64: base64Data,
@@ -171,4 +175,3 @@ export async function compressImage(file: File): Promise<{ base64: string; mimeT
     reader.readAsDataURL(file);
   });
 }
-

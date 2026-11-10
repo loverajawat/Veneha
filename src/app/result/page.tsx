@@ -6,31 +6,51 @@ import Link from 'next/link';
 import { 
   Award, 
   CheckCircle2, 
-  XCircle, 
   AlertTriangle, 
-  Clock, 
   Sparkles, 
   ArrowRight, 
   ArrowLeft,
   RotateCcw, 
-  History, 
   BookOpen, 
   Mic, 
   Users, 
   FileText,
-  Lightbulb,
-  ShieldAlert
+  ShieldAlert,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check,
+  Quote,
+  Target,
+  AlertCircle
 } from 'lucide-react';
-import OLQBadge from '@/components/OLQBadge';
 import { PPDTPicture } from '@/data/pictures';
-import { getPictureGridData } from '@/lib/guestStorage';
+import { Button, CardBase, TagChip, PillTab } from '@/components/ui';
+import { useLanguage } from '@/context/LanguageContext';
+import { PpdtAssessment } from '@/lib/assessor/types';
 
 export default function ResultPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
 
-  const [feedback, setFeedback] = useState<any>(null);
+  const [assessment, setAssessment] = useState<PpdtAssessment | null>(null);
   const [picture, setPicture] = useState<PPDTPicture | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'modelStory' | 'gdCoach'>('overview');
+  const [confirmedStory, setConfirmedStory] = useState('');
+  const [isStoryExpanded, setIsStoryExpanded] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'detailed' | 'improve' | 'discussion'>('overview');
+  const [copiedText, setCopiedText] = useState(false);
+
+  // Accordion open states for Detailed tab
+  const [openAccordions, setOpenAccordions] = useState<{ [key: string]: boolean }>({
+    picture: true,
+    storyQuality: true,
+    olq: true,
+    realism: true,
+  });
+
+  const toggleAccordion = (key: string) => {
+    setOpenAccordions((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     const rawPic = sessionStorage.getItem('current_ppdt_picture');
@@ -40,497 +60,645 @@ export default function ResultPage() {
       } catch {}
     }
 
+    const rawTranscript = sessionStorage.getItem('current_story_transcript');
+    if (rawTranscript) {
+      setConfirmedStory(rawTranscript);
+    }
+
     const rawFeedback = sessionStorage.getItem('current_assessment_result');
     if (rawFeedback) {
       try {
-        setFeedback(JSON.parse(rawFeedback));
+        setAssessment(JSON.parse(rawFeedback));
       } catch {}
     }
   }, []);
 
-  if (!feedback) {
+  const handleCopyFeedback = () => {
+    if (!assessment) return;
+    const text = `VENEHA PPDT ASSESSMENT REPORT
+Overall Score: ${assessment.final_assessment?.overall_score || 0}/10
+Verdict: ${assessment.ppdt_suitability?.verdict || 'Average'}
+
+ASSESSOR VERDICT:
+${assessment.final_assessment?.verdict || ''}
+
+SUB-SCORES:
+- Picture Perception: ${assessment.final_assessment?.picture_perception || 0}/10
+- Story: ${assessment.final_assessment?.story || 0}/10
+- Realism: ${assessment.final_assessment?.realism || 0}/10
+- Protagonist & Action: ${assessment.final_assessment?.protagonist_action || 0}/10
+- Narration Suitability: ${assessment.final_assessment?.narration_suitability || 0}/10
+`;
+    navigator.clipboard.writeText(text);
+    setCopiedText(true);
+    setTimeout(() => setCopiedText(false), 2000);
+  };
+
+  if (!assessment) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-olive-800 flex items-center justify-center text-camo-gold mb-4 animate-pulse">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto my-12">
+        <div className="w-12 h-12 rounded-xl bg-surface border border-hairline flex items-center justify-center text-primary mb-4 animate-pulse">
           <Sparkles className="w-6 h-6" />
         </div>
-        <h2 className="text-xl font-bold text-white">Loading Psychological Assessment...</h2>
-        <p className="text-xs text-gray-400 mt-1 mb-4">
-          Please wait while the assessor feedback renders.
+        <h2 className="text-xl font-bold text-ink">Loading Assessor Evaluation...</h2>
+        <p className="text-xs text-slate mt-1 mb-6">
+          If you refreshed the page without completing an assessment, please return to practice.
         </p>
         <Link
           href="/practice"
-          className="px-4 py-2 rounded-xl bg-olive-600 text-white text-xs font-semibold"
+          className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-pressed transition-colors"
         >
-          Return to Practice
+          Return to Practice Grid
         </Link>
       </div>
     );
   }
 
   const {
-    summaryRating,
-    timelineCheck,
-    fourDs,
-    olqsDemonstrated,
-    olqsMissingOrWeak,
-    languageAndCraft,
-    pictureRelevance,
-    modelStory,
-    narrationAndGdCoach,
-    threeActionableFixes,
-  } = feedback;
+    picture_perception,
+    story_quality,
+    olq_perspective = [],
+    realism_check = [],
+    ppdt_suitability,
+    what_to_change,
+    final_assessment,
+    improved_story,
+    discussion,
+    assessment_meta
+  } = assessment;
+
+  const verdict = ppdt_suitability?.verdict || 'Average';
+  let verdictColor: 'green' | 'yellow' | 'red' = 'yellow';
+  if (verdict === 'Strong') verdictColor = 'green';
+  if (verdict === 'Weak') verdictColor = 'red';
+
+  const subScores = [
+    { label: 'Picture Perception', score: final_assessment?.picture_perception ?? 5 },
+    { label: 'Story Quality', score: final_assessment?.story ?? 5 },
+    { label: 'Realism', score: final_assessment?.realism ?? 5 },
+    { label: 'Protagonist & Action', score: final_assessment?.protagonist_action ?? 5 },
+    { label: 'Narration Suitability', score: final_assessment?.narration_suitability ?? 5 },
+  ];
 
   return (
-    <div className="flex-1 flex flex-col max-w-5xl mx-auto px-4 sm:px-6 py-8 w-full space-y-6 animate-fade-in">
-      {/* Top Disclaimer Banner */}
-      <div className="p-3.5 rounded-2xl bg-olive-950/90 border border-olive-700/80 text-xs sm:text-sm text-gray-300 flex items-center gap-2.5 shadow-sm">
-        <ShieldAlert className="w-4 h-4 text-camo-gold shrink-0" />
-        <span>
-          <strong>Notice: </strong>Feedback is AI-generated practice guidance. It is not an official assessment or a prediction of selection.
-        </span>
+    <div className="flex-1 flex flex-col max-w-5xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6 text-ink font-sans">
+      
+      {/* 1. Header & Strict Disclaimer */}
+      <div className="space-y-3">
+        <div className="p-3.5 rounded-lg bg-surface border border-hairline text-xs text-slate flex items-start gap-2.5">
+          <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <p className="leading-relaxed">
+            <strong className="text-charcoal font-semibold">Strict Assessor Disclaimer: </strong>
+            AI practice feedback, strict by design. It is not an official assessment, and a single story cannot prove any quality. Gemini can make mistakes.
+          </p>
+        </div>
+
+        {/* Collapsible Story Panel */}
+        {confirmedStory && (
+          <div className="rounded-xl border border-hairline bg-surface overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setIsStoryExpanded(!isStoryExpanded)}
+              className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-canvas transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                {picture && (
+                  <img
+                    src={picture.path}
+                    alt={picture.title}
+                    className="w-10 h-8 object-cover rounded border border-hairline shrink-0"
+                  />
+                )}
+                <div className="text-xs">
+                  <span className="font-semibold text-charcoal block">
+                    {picture?.title || 'Your Submitted Story'}
+                  </span>
+                  <span className="text-steel text-[11px]">
+                    {confirmedStory.split(/\s+/).filter(Boolean).length} words · Click to {isStoryExpanded ? 'collapse' : 'view original'}
+                  </span>
+                </div>
+              </div>
+              <span className="text-slate p-1">
+                {isStoryExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+
+            {isStoryExpanded && (
+              <div className="px-4 py-3 border-t border-hairline bg-canvas/60 text-xs text-charcoal font-sans leading-relaxed whitespace-pre-wrap">
+                {confirmedStory}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Top Banner: Score & Verdict */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#152014] via-[#111910] to-[#0a1009] border border-olive-700/80 shadow-2xl relative overflow-hidden">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      {/* 2. Top Banner: Score & Assessor Verdict */}
+      <div className="p-6 rounded-2xl bg-surface border border-hairline shadow-sm space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-hairline">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-olive-950/90 border border-olive-700 text-camo-gold text-xs font-semibold mb-3">
-              <Award className="w-3.5 h-3.5" />
-              <span>AI PPDT Assessment Analysis</span>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-xs font-semibold text-steel uppercase tracking-wider">
+                SSB PPDT Evaluation
+              </span>
+              <TagChip color={verdictColor}>
+                {verdict} PPDT Suitability
+              </TagChip>
             </div>
-            <h1 className="text-2xl sm:text-4xl font-serif font-extrabold text-white">
-              {summaryRating?.verdictBadge || 'Assessment Evaluation Complete'}
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink flex items-baseline gap-2">
+              <span>{final_assessment?.overall_score?.toFixed(1) ?? '5.0'}</span>
+              <span className="text-base text-slate font-normal">/ 10</span>
             </h1>
-            <p className="mt-2 text-base text-gray-200 max-w-2xl leading-relaxed">
-              {summaryRating?.headline || 'Your story has been evaluated against practice criteria.'}
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="secondary"
+              onClick={handleCopyFeedback}
+              className="text-xs py-1.5 px-3 flex items-center gap-1.5"
+            >
+              {copiedText ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedText ? 'Copied' : 'Copy Feedback'}</span>
+            </Button>
+            <Link href="/practice">
+              <Button variant="primary" className="text-xs py-1.5 px-3 flex items-center gap-1">
+                <span>Try Another Picture</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Five Sub-scores in a Row */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+          {subScores.map((sub) => {
+            const pct = Math.min(100, (sub.score / 10) * 100);
+            return (
+              <div key={sub.label} className="p-3 rounded-lg bg-canvas border border-hairline space-y-1.5">
+                <span className="text-[11px] text-slate font-medium block truncate" title={sub.label}>
+                  {sub.label}
+                </span>
+                <div className="flex items-baseline justify-between text-xs">
+                  <strong className="text-ink font-semibold">{sub.score.toFixed(1)}</strong>
+                  <span className="text-steel text-[10px]">/ 10</span>
+                </div>
+                <div className="w-full h-1.5 bg-hairline rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Blunt Assessor Verdict Card */}
+        {final_assessment?.verdict && (
+          <div className="p-4 rounded-xl bg-card-tint-yellow/40 border border-amber-200/80 space-y-1.5">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
+              <Award className="w-4 h-4 text-amber-700" />
+              <span>Assessor Verdict</span>
+            </div>
+            <p className="text-xs text-charcoal leading-relaxed">
+              {final_assessment.verdict}
             </p>
           </div>
-
-          {/* Big Score Dial */}
-          <div className="flex flex-col items-center justify-center p-5 rounded-2xl bg-[#090f08]/90 border border-olive-700/80 shadow-inner shrink-0 self-start md:self-auto min-w-[130px]">
-            <span className="text-[10px] uppercase font-bold text-olive-400 tracking-wider">
-              Assessor Score
-            </span>
-            <div className="text-4xl font-mono font-black text-camo-gold mt-0.5">
-              {summaryRating?.overallScore || '7.5'}
-              <span className="text-sm font-normal text-gray-500">/10</span>
-            </div>
-            <span className="text-[10px] text-gray-400 mt-1 font-semibold">
-              {summaryRating?.overallScore >= 7.0 ? 'Recommended Tier' : 'Needs Practice'}
-            </span>
-          </div>
-        </div>
-
-        {/* Disclaimer Bar */}
-        <div className="mt-6 pt-4 border-t border-olive-800/80 flex items-center gap-2 text-[11px] text-gray-400">
-          <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>
-            <strong>Practice Guidance Only: </strong>
-            This evaluation is a structured training aid to build Officer-Like Qualities and is never an official Services Selection Board selection prediction.
-          </span>
-        </div>
+        )}
       </div>
 
-      {/* Secondary Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-olive-800/80 pb-2 overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('overview')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shrink-0 ${
-            activeTab === 'overview'
-              ? 'bg-olive-600 text-white shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-olive-950'
-          }`}
-        >
-          <Award className="w-4 h-4" />
-          <span>Detailed Assessment</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('modelStory')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shrink-0 ${
-            activeTab === 'modelStory'
-              ? 'bg-olive-600 text-white shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-olive-950'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-camo-gold" />
-          <span>Elevated Model Story</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('gdCoach')}
-          className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 shrink-0 ${
-            activeTab === 'gdCoach'
-              ? 'bg-olive-600 text-white shadow-md'
-              : 'text-gray-400 hover:text-white hover:bg-olive-950'
-          }`}
-        >
-          <Mic className="w-4 h-4" />
-          <span>1-Min Narration & GD Coaching</span>
-        </button>
+      {/* 3. Navigation Tabs */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-hairline">
+        <PillTab active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>
+          Overview & Verdict
+        </PillTab>
+        <PillTab active={activeTab === 'detailed'} onClick={() => setActiveTab('detailed')}>
+          Detailed Assessment
+        </PillTab>
+        <PillTab active={activeTab === 'improve'} onClick={() => setActiveTab('improve')}>
+          What to Improve
+        </PillTab>
+        <PillTab active={activeTab === 'discussion'} onClick={() => setActiveTab('discussion')}>
+          Group Discussion Coach
+        </PillTab>
       </div>
 
-      {/* TAB 1: DETAILED ASSESSMENT OVERVIEW */}
+      {/* 4. Tab Contents */}
+
+      {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Section 1: The 10-75-15 Rule Analysis */}
-          <div className="p-6 rounded-3xl bg-[#121911] border border-olive-800 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
-                <Clock className="w-5 h-5 text-camo-gold" />
-                <span>The 10-75-15 Timeline Architecture</span>
+        <div className="space-y-5">
+          {/* PPDT Suitability Explanation */}
+          {ppdt_suitability && (
+            <CardBase className="p-5 space-y-2">
+              <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                PPDT Suitability Assessment ({verdict})
               </h3>
-              <span className="text-xs text-olive-300 font-semibold">Ratio Check</span>
-            </div>
-
-            {/* Ratio Visualizer */}
-            <div className="space-y-1.5">
-              <div className="w-full h-4 rounded-full overflow-hidden bg-[#090f08] border border-olive-800 flex text-[10px] font-bold text-white text-center leading-4">
-                <div
-                  style={{ width: `${timelineCheck?.setupPercent || 15}%` }}
-                  className="bg-amber-600/90"
-                  title="Setup"
-                >
-                  Setup {timelineCheck?.setupPercent || 15}%
+              <p className="text-xs text-charcoal leading-relaxed">
+                {ppdt_suitability.explanation}
+              </p>
+              {ppdt_suitability.narration_assessment && (
+                <div className="pt-2 text-xs text-slate border-t border-hairline mt-2">
+                  <strong className="text-charcoal block mb-0.5">Narration Feasibility:</strong>
+                  {ppdt_suitability.narration_assessment}
                 </div>
-                <div
-                  style={{ width: `${timelineCheck?.actionPercent || 70}%` }}
-                  className="bg-emerald-600/90"
-                  title="Action"
-                >
-                  Action {timelineCheck?.actionPercent || 70}%
-                </div>
-                <div
-                  style={{ width: `${timelineCheck?.resolutionPercent || 15}%` }}
-                  className="bg-blue-600/90"
-                  title="Resolution"
-                >
-                  End {timelineCheck?.resolutionPercent || 15}%
-                </div>
-              </div>
-
-              <div className="flex justify-between text-[11px] text-gray-400 px-1">
-                <span>Setup: ~10% (1 sentence)</span>
-                <span>Action: ~75% (5-7 sentences)</span>
-                <span>Resolution: ~15% (1-2 sentences)</span>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-gray-300 leading-relaxed bg-[#0a0f09] p-3.5 rounded-2xl border border-olive-900">
-              {timelineCheck?.assessment || 'Timeline architecture analyzed.'}
-            </p>
-          </div>
-
-          {/* Section 2: The 4 D's of Positive Action */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="font-heading font-bold text-lg text-white">
-                The 4 D's of Officer-Like Action
-              </h3>
-              <span className="text-xs text-gray-400">Aim for at least 2 demonstrated</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Direct Action */}
-              <div className="p-4 rounded-2xl bg-[#111710] border border-olive-800/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-white flex items-center gap-1.5">
-                    {fourDs?.directAction?.present ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-500" />
-                    )}
-                    Direct Action
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      fourDs?.directAction?.present
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
-                        : 'bg-gray-900 text-gray-400'
-                    }`}
-                  >
-                    {fourDs?.directAction?.present ? 'Demonstrated' : 'Missing'}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  {fourDs?.directAction?.feedback}
-                </p>
-                {fourDs?.directAction?.evidence && (
-                  <div className="text-[11px] text-olive-300 italic bg-[#0a0f09] p-2 rounded-lg border border-olive-900">
-                    "{fourDs?.directAction?.evidence}"
-                  </div>
-                )}
-              </div>
-
-              {/* Decision */}
-              <div className="p-4 rounded-2xl bg-[#111710] border border-olive-800/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-white flex items-center gap-1.5">
-                    {fourDs?.decision?.present ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-500" />
-                    )}
-                    Decision
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      fourDs?.decision?.present
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
-                        : 'bg-gray-900 text-gray-400'
-                    }`}
-                  >
-                    {fourDs?.decision?.present ? 'Demonstrated' : 'Missing'}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  {fourDs?.decision?.feedback}
-                </p>
-                {fourDs?.decision?.evidence && (
-                  <div className="text-[11px] text-olive-300 italic bg-[#0a0f09] p-2 rounded-lg border border-olive-900">
-                    "{fourDs?.decision?.evidence}"
-                  </div>
-                )}
-              </div>
-
-              {/* Delegation */}
-              <div className="p-4 rounded-2xl bg-[#111710] border border-olive-800/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-white flex items-center gap-1.5">
-                    {fourDs?.delegation?.present ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-500" />
-                    )}
-                    Delegation
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      fourDs?.delegation?.present
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
-                        : 'bg-gray-900 text-gray-400'
-                    }`}
-                  >
-                    {fourDs?.delegation?.present ? 'Demonstrated' : 'Missing'}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  {fourDs?.delegation?.feedback}
-                </p>
-                {fourDs?.delegation?.evidence && (
-                  <div className="text-[11px] text-olive-300 italic bg-[#0a0f09] p-2 rounded-lg border border-olive-900">
-                    "{fourDs?.delegation?.evidence}"
-                  </div>
-                )}
-              </div>
-
-              {/* Deployment */}
-              <div className="p-4 rounded-2xl bg-[#111710] border border-olive-800/80 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-white flex items-center gap-1.5">
-                    {fourDs?.deployment?.present ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <XCircle className="w-4 h-4 text-gray-500" />
-                    )}
-                    Deployment
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      fourDs?.deployment?.present
-                        ? 'bg-emerald-950 text-emerald-300 border border-emerald-700'
-                        : 'bg-gray-900 text-gray-400'
-                    }`}
-                  >
-                    {fourDs?.deployment?.present ? 'Demonstrated' : 'Missing'}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-300 leading-relaxed">
-                  {fourDs?.deployment?.feedback}
-                </p>
-                {fourDs?.deployment?.evidence && (
-                  <div className="text-[11px] text-olive-300 italic bg-[#0a0f09] p-2 rounded-lg border border-olive-900">
-                    "{fourDs?.deployment?.evidence}"
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Demonstrated Officer Like Qualities */}
-          <div className="p-6 rounded-3xl bg-[#121911] border border-olive-800 shadow-xl space-y-4">
-            <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
-              <Award className="w-5 h-5 text-camo-gold" />
-              <span>Demonstrated Officer Like Qualities (OLQs)</span>
-            </h3>
-
-            <div className="space-y-3">
-              {olqsDemonstrated && olqsDemonstrated.length > 0 ? (
-                olqsDemonstrated.map((item: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-2xl bg-[#0b1009] border border-olive-900 space-y-2"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <OLQBadge name={item.olqName} factor={item.factor} showFactor={true} />
-                    </div>
-                    {item.verbatimQuote && (
-                      <p className="text-xs text-olive-200 italic pl-3 border-l-2 border-camo-gold">
-                        "{item.verbatimQuote}"
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-300 leading-relaxed">{item.assessorRemark}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-xs text-gray-400">No explicit OLQs detected in this draft.</p>
               )}
-            </div>
-          </div>
+            </CardBase>
+          )}
 
-          {/* Section 4: Three High-Impact Fixes */}
-          {threeActionableFixes && threeActionableFixes.length > 0 && (
-            <div className="p-6 rounded-3xl bg-gradient-to-br from-olive-950 via-[#121911] to-[#0a1009] border border-olive-700/80 shadow-xl space-y-3">
-              <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-camo-gold" />
-                <span>3 Tactical Fixes for Your Next Story</span>
-              </h3>
-              <div className="space-y-2">
-                {threeActionableFixes.map((fix: string, idx: number) => (
-                  <div
-                    key={idx}
-                    className="flex items-start gap-3 p-3 rounded-xl bg-[#090f08] border border-olive-800 text-xs text-gray-200"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-olive-700 text-camo-gold font-bold flex items-center justify-center shrink-0 text-[11px]">
-                      {idx + 1}
-                    </span>
-                    <span className="leading-relaxed">{fix}</span>
-                  </div>
-                ))}
+          {/* Aim & Improved Story (When Included) */}
+          {improved_story?.included && improved_story.story && (
+            <CardBase className="p-5 space-y-3 bg-purple-50/40 border-purple-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-ink">Elevated Model Story</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const text = `${improved_story.aim ? `AIM: ${improved_story.aim}\n\n` : ''}${improved_story.story}`;
+                    navigator.clipboard.writeText(text);
+                  }}
+                  className="text-xs text-primary hover:underline flex items-center gap-1"
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copy Story
+                </button>
               </div>
+
+              {improved_story.aim && (
+                <div className="p-2.5 rounded-lg bg-surface border border-hairline text-xs font-medium text-charcoal">
+                  <span className="text-steel font-bold uppercase text-[10px] mr-1.5">Aim:</span>
+                  {improved_story.aim}
+                </div>
+              )}
+
+              <p className="text-xs text-charcoal leading-relaxed whitespace-pre-wrap font-sans">
+                {improved_story.story}
+              </p>
+            </CardBase>
+          )}
+
+          {/* Quick Summary of Key Fixes */}
+          {what_to_change && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {what_to_change.remove && (
+                <CardBase className="p-4 space-y-1.5 border-rose-200 bg-rose-50/30">
+                  <strong className="text-xs font-semibold text-rose-900 block">What to Remove:</strong>
+                  <p className="text-xs text-charcoal leading-relaxed">{what_to_change.remove}</p>
+                </CardBase>
+              )}
+              {what_to_change.add && (
+                <CardBase className="p-4 space-y-1.5 border-emerald-200 bg-emerald-50/30">
+                  <strong className="text-xs font-semibold text-emerald-900 block">What to Add:</strong>
+                  <p className="text-xs text-charcoal leading-relaxed">{what_to_change.add}</p>
+                </CardBase>
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 2: ELEVATED MODEL STORY */}
-      {activeTab === 'modelStory' && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#121911] border border-olive-800 shadow-xl space-y-6">
-          <div className="border-b border-olive-800/80 pb-4">
-            <span className="text-xs font-bold text-camo-gold uppercase tracking-wider block">
-              Practice Recommendation Benchmark
-            </span>
-            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-white mt-1">
-              {modelStory?.title || 'Elevated Model Story'}
-            </h2>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Preserves your original characters and theme, elevated with active verbs, realistic authority, and 4 D's.
-            </p>
+      {/* TAB 2: DETAILED ASSESSMENT (4 Accordions) */}
+      {activeTab === 'detailed' && (
+        <div className="space-y-4">
+          
+          {/* Accordion 1: Picture Perception */}
+          <div className="rounded-xl border border-hairline bg-surface overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('picture')}
+              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-canvas transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-charcoal">
+                1. Picture Perception & Environmental Grounding
+              </h3>
+              <span className="text-slate">
+                {openAccordions.picture ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+            {openAccordions.picture && (
+              <div className="p-4 border-t border-hairline bg-canvas/30 space-y-3 text-xs">
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Details Identified Correctly:</strong>
+                  <p className="text-slate leading-relaxed">{picture_perception?.identified_correctly || 'None noted'}</p>
+                </div>
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Important Elements Ignored:</strong>
+                  <p className="text-slate leading-relaxed">{picture_perception?.ignored_elements || 'None'}</p>
+                </div>
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Logical Interpretation:</strong>
+                  <p className="text-slate leading-relaxed">{picture_perception?.logical_interpretation || 'Reasonable'}</p>
+                </div>
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Unnecessarily Imagined Details:</strong>
+                  <p className="text-slate leading-relaxed">{picture_perception?.unnecessarily_imagined || 'None'}</p>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Story text */}
-          <div className="p-5 rounded-2xl bg-[#090f08] border border-olive-700/80 text-sm sm:text-base text-gray-100 leading-relaxed font-sans shadow-inner">
-            {modelStory?.story}
+          {/* Accordion 2: Story Quality */}
+          <div className="rounded-xl border border-hairline bg-surface overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('storyQuality')}
+              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-canvas transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-charcoal">
+                2. Story Quality & Execution Analysis
+              </h3>
+              <span className="text-slate">
+                {openAccordions.storyQuality ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+            {openAccordions.storyQuality && (
+              <div className="p-4 border-t border-hairline bg-canvas/30 space-y-3 text-xs">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <strong className="text-charcoal block mb-0.5">Protagonist & Demographics:</strong>
+                    <p className="text-slate leading-relaxed">{story_quality?.protagonist} ({story_quality?.age_gender_emotional_state})</p>
+                  </div>
+                  <div>
+                    <strong className="text-charcoal block mb-0.5">Premise & Context:</strong>
+                    <p className="text-slate leading-relaxed">{story_quality?.premise_situation}</p>
+                  </div>
+                </div>
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Actions Taken:</strong>
+                  <p className="text-slate leading-relaxed">{story_quality?.actions_taken}</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <strong className="text-charcoal block mb-0.5">Initiative & Responsibility:</strong>
+                    <p className="text-slate leading-relaxed">{story_quality?.initiative_responsibility}</p>
+                  </div>
+                  <div>
+                    <strong className="text-charcoal block mb-0.5">Action vs Passive Description:</strong>
+                    <p className="text-slate leading-relaxed">{story_quality?.action_vs_description}</p>
+                  </div>
+                </div>
+                <div>
+                  <strong className="text-charcoal block mb-0.5">Ending / Resolution:</strong>
+                  <p className="text-slate leading-relaxed">{story_quality?.ending_resolution}</p>
+                </div>
+                {story_quality?.quotes && story_quality.quotes.length > 0 && (
+                  <div className="pt-2 border-t border-hairline">
+                    <strong className="text-charcoal block mb-1">Verified Quotes from Your Story:</strong>
+                    <div className="space-y-1">
+                      {story_quality.quotes.map((q, idx) => (
+                        <div key={idx} className="p-2 rounded bg-surface border border-hairline text-slate italic flex items-start gap-1.5">
+                          <Quote className="w-3.5 h-3.5 text-steel shrink-0 mt-0.5" />
+                          <span>"{q}"</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Why this works */}
-          <div className="p-4 rounded-2xl bg-olive-950/80 border border-olive-900 text-xs text-olive-200 space-y-1">
-            <strong className="text-camo-gold block font-semibold">Assessor's Analysis:</strong>
-            <p className="leading-relaxed">{modelStory?.whyThisWorks}</p>
+          {/* Accordion 3: SSB/OLQ Perspective */}
+          <div className="rounded-xl border border-hairline bg-surface overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('olq')}
+              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-canvas transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-charcoal">
+                3. SSB Officer Like Qualities (OLQ) Perspective ({olq_perspective.length} Qualities)
+              </h3>
+              <span className="text-slate">
+                {openAccordions.olq ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+            {openAccordions.olq && (
+              <div className="divide-y divide-hairline border-t border-hairline bg-canvas/30 text-xs">
+                {olq_perspective.map((olqItem, idx) => {
+                  let basisTagColor: 'green' | 'yellow' | 'gray' = 'gray';
+                  let basisLabel = 'Not demonstrated';
+                  if (olqItem.basis === 'present_in_story') {
+                    basisTagColor = 'green';
+                    basisLabel = 'Present in story';
+                  } else if (olqItem.basis === 'inferred') {
+                    basisTagColor = 'yellow';
+                    basisLabel = 'Inferred';
+                  }
+
+                  return (
+                    <div key={idx} className="p-3.5 space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <strong className="text-charcoal font-semibold">{olqItem.olq}</strong>
+                        <TagChip color={basisTagColor}>{basisLabel}</TagChip>
+                      </div>
+                      <p className="text-slate leading-relaxed">{olqItem.tendency}</p>
+                      {olqItem.quote && (
+                        <div className="text-[11px] text-steel italic pl-3 border-l-2 border-primary/40 pt-0.5">
+                          Quote: "{olqItem.quote}"
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Accordion 4: Realism Check */}
+          <div className="rounded-xl border border-hairline bg-surface overflow-hidden">
+            <button
+              type="button"
+              onClick={() => toggleAccordion('realism')}
+              className="w-full px-4 py-3.5 flex items-center justify-between text-left hover:bg-canvas transition-colors"
+            >
+              <h3 className="text-sm font-semibold text-charcoal">
+                4. Realism & Risk Area Audit ({realism_check.length} Risk Areas)
+              </h3>
+              <span className="text-slate">
+                {openAccordions.realism ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </span>
+            </button>
+            {openAccordions.realism && (
+              <div className="divide-y divide-hairline border-t border-hairline bg-canvas/30 text-xs">
+                {realism_check.map((item, idx) => (
+                  <div key={idx} className="p-3.5 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <strong className="text-charcoal font-semibold">{item.area}</strong>
+                      <TagChip color={item.problem_found ? 'red' : 'green'}>
+                        {item.problem_found ? 'Problem found' : 'No problem found'}
+                      </TagChip>
+                    </div>
+                    <p className="text-slate leading-relaxed">{item.finding}</p>
+                    {item.quote && (
+                      <div className="text-[11px] text-steel italic pl-3 border-l-2 border-rose-300 pt-0.5">
+                        Excerpt: "{item.quote}"
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* TAB 3: NARRATION & GD COACH */}
-      {activeTab === 'gdCoach' && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#121911] border border-olive-800 shadow-xl space-y-6">
-          <div className="border-b border-olive-800/80 pb-4">
-            <span className="text-xs font-bold text-camo-gold uppercase tracking-wider block">
-              PPDT Defense Coaching
-            </span>
-            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-white mt-1">
-              Individual Narration & Group Discussion Strategy
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 1-Minute Narration */}
-            <div className="p-5 rounded-2xl bg-[#0d130c] border border-olive-800/90 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-olive-800/80 flex items-center justify-center text-camo-gold">
-                  <Mic className="w-4 h-4" />
-                </div>
-                <h3 className="font-bold text-base text-white">1-Minute Narration Drill</h3>
+      {/* TAB 3: WHAT TO IMPROVE */}
+      {activeTab === 'improve' && (
+        <div className="space-y-4">
+          <CardBase className="p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-ink">Actionable Writing Fixes</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">What to Remove:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.remove || 'None'}</p>
               </div>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                {narrationAndGdCoach?.oneMinuteNarrationTip ||
-                  'Speak firmly at a measured tempo for 50-55 seconds. Look across the group, not at the assessors.'}
-              </p>
-              <div className="p-3 rounded-xl bg-olive-950 border border-olive-900 text-[11px] text-olive-300">
-                <strong>Assessor Rule: </strong> Never restart your story if you stumble. Pause for 1 second, smile, and continue calmly.
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">What to Add:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.add || 'None'}</p>
               </div>
-            </div>
-
-            {/* GD Consensus */}
-            <div className="p-5 rounded-2xl bg-[#0d130c] border border-olive-800/90 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-olive-800/80 flex items-center justify-center text-camo-gold">
-                  <Users className="w-4 h-4" />
-                </div>
-                <h3 className="font-bold text-base text-white">Group Discussion Strategy</h3>
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Protagonist Adjustments:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.protagonist_changes || 'None'}</p>
               </div>
-              <p className="text-xs text-gray-300 leading-relaxed">
-                {narrationAndGdCoach?.gdConsensusStrategy ||
-                  'In the GD, support others by Chest Number and steer towards one unified story rather than arguing.'}
-              </p>
-              <div className="p-3 rounded-xl bg-olive-950 border border-olive-900 text-[11px] text-olive-300">
-                <strong>Assessor Rule: </strong> Don't participate in fish-market screaming. Speak 2-3 logical points that unite the group.
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Make Solution More Practical:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.make_solution_practical || 'None'}</p>
+              </div>
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">How to Make It Concise:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.make_concise || 'None'}</p>
+              </div>
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Mistakes to Avoid Next Time:</strong>
+                <p className="text-slate leading-relaxed">{what_to_change?.mistakes_to_avoid || 'None'}</p>
               </div>
             </div>
-          </div>
+          </CardBase>
+
+          {/* Model Story when available */}
+          {improved_story?.included && improved_story.story && (
+            <CardBase className="p-5 space-y-3 bg-purple-50/40 border-purple-200">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-ink">Elevated Model Story</h3>
+              </div>
+              {improved_story.aim && (
+                <div className="p-2.5 rounded-lg bg-surface border border-hairline text-xs font-medium text-charcoal">
+                  <span className="text-steel font-bold uppercase text-[10px] mr-1.5">Aim:</span>
+                  {improved_story.aim}
+                </div>
+              )}
+              <p className="text-xs text-charcoal leading-relaxed whitespace-pre-wrap font-sans">
+                {improved_story.story}
+              </p>
+            </CardBase>
+          )}
         </div>
       )}
 
-      {/* Bottom Actions (Step 7: Back to pictures + Try another picture) */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-olive-800/80">
-        <Link
-          href="/history"
-          className="text-xs font-semibold text-gray-400 hover:text-white flex items-center gap-1.5 transition-colors"
-        >
-          <History className="w-4 h-4 text-olive-400" />
-          <span>View Past Attempts & Scores</span>
+      {/* TAB 4: GROUP DISCUSSION COACH */}
+      {activeTab === 'discussion' && (
+        <div className="space-y-4">
+          <CardBase className="p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-ink flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              PPDT Group Discussion Strategy
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Entry Strategy:</strong>
+                <p className="text-slate leading-relaxed">{discussion?.entry_strategy || 'Speak calmly and early without cutting off others.'}</p>
+              </div>
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Entry Timing:</strong>
+                <p className="text-slate leading-relaxed">{discussion?.entry_timing || 'After the first 1-2 candidates pause.'}</p>
+              </div>
+            </div>
+
+            {/* Entry Phrases */}
+            {discussion?.entry_phrases && discussion.entry_phrases.length > 0 && (
+              <div className="p-3.5 rounded-lg bg-canvas border border-hairline space-y-2 text-xs">
+                <strong className="text-charcoal block">Natural Discussion Entry Phrases:</strong>
+                <div className="space-y-1.5">
+                  {discussion.entry_phrases.map((phrase, idx) => (
+                    <div key={idx} className="p-2 rounded bg-surface border border-hairline text-charcoal font-medium">
+                      "{phrase}"
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Stance & Explanation */}
+            <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1 text-xs">
+              <div className="flex items-center gap-2">
+                <strong className="text-charcoal">Recommended Stance:</strong>
+                <TagChip color="purple">{discussion?.stance || 'modify'}</TagChip>
+              </div>
+              <p className="text-slate leading-relaxed">{discussion?.stance_explanation}</p>
+            </div>
+
+            {/* Ordered Speaking Points */}
+            {discussion?.key_points && discussion.key_points.length > 0 && (
+              <div className="space-y-2 text-xs">
+                <strong className="text-charcoal block">Key Speaking Points (In Speaking Order):</strong>
+                <div className="space-y-1.5">
+                  {discussion.key_points.map((pt, idx) => (
+                    <div key={idx} className="p-2.5 rounded-lg bg-surface border border-hairline flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2">
+                        <span className="font-bold text-steel">{pt.order}.</span>
+                        <span className="text-charcoal leading-relaxed">{pt.point}</span>
+                      </div>
+                      <TagChip color={pt.priority === 'most_important' ? 'green' : pt.priority === 'important' ? 'yellow' : 'gray'}>
+                        {pt.priority}
+                      </TagChip>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-2">
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Details to Avoid:</strong>
+                <p className="text-slate leading-relaxed">{discussion?.details_to_avoid || 'None'}</p>
+              </div>
+              <div className="p-3.5 rounded-lg bg-surface border border-hairline space-y-1">
+                <strong className="text-charcoal block">Connecting with Others' Stories:</strong>
+                <p className="text-slate leading-relaxed">{discussion?.connecting_with_other_stories || 'Find common ground in the central theme.'}</p>
+              </div>
+            </div>
+
+            {discussion?.weaknesses_and_handling && (
+              <div className="p-3.5 rounded-lg bg-rose-50/40 border border-rose-200 text-xs space-y-1">
+                <strong className="text-rose-900 block">Handling Story Weaknesses in GD:</strong>
+                <p className="text-charcoal leading-relaxed">{discussion.weaknesses_and_handling}</p>
+              </div>
+            )}
+          </CardBase>
+        </div>
+      )}
+
+      {/* 5. Bottom Navigation Bar */}
+      <div className="flex items-center justify-between pt-4 border-t border-hairline">
+        <Link href="/practice">
+          <Button variant="secondary" className="text-xs py-2 px-4 flex items-center gap-1.5">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Pictures</span>
+          </Button>
         </Link>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Link
-            href="/practice"
-            className="px-5 py-2.5 rounded-xl bg-[#111710] border border-olive-700 text-xs font-semibold text-gray-200 hover:text-white hover:bg-olive-950 transition-colors flex items-center gap-1.5"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to pictures</span>
-          </Link>
-
-          <button
-            onClick={() => {
-              try {
-                const grid = getPictureGridData();
-                const unattempted = grid.filter((g) => !g.attempted);
-                const pool = unattempted.length > 0 ? unattempted : grid;
-                if (pool.length > 0) {
-                  const choice = pool[Math.floor(Math.random() * pool.length)];
-                  router.push(`/practice/${choice.pictureNumber}`);
-                  return;
-                }
-              } catch {}
-              router.push('/practice');
-            }}
-            className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-olive-600 to-olive-500 hover:from-olive-500 hover:to-olive-400 text-white font-bold text-xs sm:text-sm shadow-xl shadow-olive-950/60 transition-all flex items-center gap-1.5"
-          >
-            <RotateCcw className="w-4 h-4 text-camo-gold" />
-            <span>Try another picture</span>
-          </button>
-        </div>
+        <Link href="/practice">
+          <Button variant="primary" className="text-xs py-2 px-4 flex items-center gap-1.5">
+            <span>Try Another Picture</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Button>
+        </Link>
       </div>
     </div>
   );
 }
-

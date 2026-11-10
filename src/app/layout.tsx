@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, Noto_Sans_Devanagari } from 'next/font/google';
 import './globals.css';
 import { LanguageProvider } from '@/context/LanguageContext';
-import TopNavigation from '@/components/TopNavigation';
-import Footer from '@/components/Footer';
+import AppShell from '@/components/AppShell';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,19 +29,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${notoDevanagari.variable}`}>
+    <html lang="en" data-theme="dark" className={`${inter.variable} ${notoDevanagari.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('veneha-theme');if(t==='light'||t==='dark'){document.documentElement.setAttribute('data-theme',t);}else{document.documentElement.setAttribute('data-theme','dark');}}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`,
+          }}
+        />
+      </head>
       <body className="bg-canvas text-ink min-h-screen flex flex-col font-sans selection:bg-primary selection:text-white antialiased">
         <LanguageProvider>
-          {/* Sticky Top Navigation (White, 64px, 1px hairline border) */}
-          <TopNavigation />
-
-          {/* Main Content Area */}
-          <main className="flex-1 flex flex-col min-w-0 bg-canvas">
-            {children}
-          </main>
-
-          {/* Global Light Footer */}
-          <Footer />
+          <AppShell>{children}</AppShell>
         </LanguageProvider>
       </body>
     </html>

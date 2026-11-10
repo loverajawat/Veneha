@@ -16,18 +16,29 @@ import {
   Star
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { siteConfig } from '@/config/siteConfig';
+import AuthPortal from '@/components/auth/AuthPortal';
 import { 
   Button, 
   FeatureCard, 
   YellowBoldBanner, 
   TagChip, 
-  AccordionItem,
+  AccordionItem, 
   CardBase 
 } from '@/components/ui';
 
 export default function HomePage() {
   const { lang } = useLanguage();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div className="w-full h-[100dvh] bg-brand-navy" />;
+  }
+
+  if (!isAuthenticated) {
+    return <AuthPortal initialOpen={false} />;
+  }
 
   return (
     <div className="flex-1 flex flex-col font-sans bg-canvas text-ink">
@@ -374,7 +385,7 @@ export default function HomePage() {
             <div>
               <h4 className="text-[18px] font-semibold text-ink">Strict Privacy Promise</h4>
               <p className="text-[15px] text-charcoal mt-0.5">
-                Your handwriting photos are deleted as soon as your answers are read. No photos are permanently stored.
+                Your photos are not saved by Veneha. Your photos, your story and the practice picture are sent to Google's Gemini service to read and evaluate them.
               </p>
             </div>
           </div>

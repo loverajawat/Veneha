@@ -93,3 +93,90 @@
   --font-hindi-stack: "Noto Sans Devanagari", "Notion Sans", Inter, sans-serif;
 }
 
+/* ==========================================================================
+   Auth Portal Tokens (--auth-*) - Splash and Sign-in Screens
+   ========================================================================== */
+:root,
+[data-theme="dark"] {
+  --auth-bg-splash: #0a1530;
+  --auth-bg-splash-radial: radial-gradient(circle at center, #1a2a52 0%, #070f24 100%);
+  --auth-bg-left: #0a1530;
+  --auth-bg-right: #000000;
+  --auth-text-primary: #ffffff;
+  --auth-text-secondary: #a4a097;
+  --auth-text-wordmark: #ffffff;
+  --auth-text-brand-bottom: #a4a097;
+  --auth-border-divider: transparent;
+  --auth-border-input: #37352f;
+  --auth-border-input-hover: #4e4c45;
+  --auth-border-input-focus: #d6b6f6;
+  --auth-ring-input-focus: rgba(214, 182, 246, 0.30);
+  --auth-bg-input: transparent;
+  --auth-text-input: #ffffff;
+  --auth-bg-tabs-track: #151513;
+  --auth-border-tabs-track: rgba(255, 255, 255, 0.08);
+  --auth-bg-tab-active: #000000;
+  --auth-border-tab-active: #37352f;
+  --auth-text-tab-active: #ffffff;
+  --auth-text-tab-inactive: #a4a097;
+  --auth-shadow-tab-active: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --auth-btn-primary-bg: #5645d4;
+  --auth-btn-primary-hover: #4534b3;
+  --auth-btn-primary-text: #ffffff;
+  --auth-btn-primary-shadow: 0 6px 20px rgba(86, 69, 212, 0.25);
+  --auth-splash-btn-bg: #ffffff;
+  --auth-splash-btn-text: #1a1a1a;
+  --auth-splash-btn-hover: #f6f5f4;
+  --auth-link-color: #a4a097;
+  --auth-link-hover: #ffffff;
+  --auth-control-border: #37352f;
+  --auth-control-bg: transparent;
+  --auth-control-hover-bg: rgba(255, 255, 255, 0.08);
+  --auth-control-text: #ffffff;
+  --auth-logo-glow: 0 0 80px rgba(86, 69, 212, 0.35);
+  --auth-brand-glow: radial-gradient(circle at 45% 43%, rgba(123, 63, 242, 0.12) 0%, transparent 65%);
+  --auth-dot-grid: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+}
+
+[data-theme="light"] {
+  --auth-bg-splash: #ffffff;
+  --auth-bg-splash-radial: radial-gradient(circle at center, #ffffff 0%, #f6f5f4 100%);
+  --auth-bg-left: #f6f5f4;
+  --auth-bg-right: #ffffff;
+  --auth-text-primary: #1a1a1a;
+  --auth-text-secondary: #5d5b54;
+  --auth-text-wordmark: #1a1a1a;
+  --auth-text-brand-bottom: #787671;
+  --auth-border-divider: #e5e3df;
+  --auth-border-input: #c8c4be;
+  --auth-border-input-hover: #787671;
+  --auth-border-input-focus: #5645d4;
+  --auth-ring-input-focus: rgba(86, 69, 212, 0.25);
+  --auth-bg-input: #ffffff;
+  --auth-text-input: #1a1a1a;
+  --auth-bg-tabs-track: #f6f5f4;
+  --auth-border-tabs-track: #e5e3df;
+  --auth-bg-tab-active: #ffffff;
+  --auth-border-tab-active: #e5e3df;
+  --auth-text-tab-active: #1a1a1a;
+  --auth-text-tab-inactive: #5d5b54;
+  --auth-shadow-tab-active: 0px 1px 2px 0px rgba(15, 15, 15, 0.04);
+  --auth-btn-primary-bg: #5645d4;
+  --auth-btn-primary-hover: #4534b3;
+  --auth-btn-primary-text: #ffffff;
+  --auth-btn-primary-shadow: none;
+  --auth-splash-btn-bg: #1a1a1a;
+  --auth-splash-btn-text: #ffffff;
+  --auth-splash-btn-hover: #37352f;
+  --auth-link-color: #0075de;
+  --auth-link-hover: #005bab;
+  --auth-control-border: #c8c4be;
+  --auth-control-bg: #f6f5f4;
+  --auth-control-hover-bg: #e5e3df;
+  --auth-control-text: #1a1a1a;
+  --auth-logo-glow: 0 0 60px rgba(86, 69, 212, 0.20);
+  --auth-brand-glow: radial-gradient(circle at 45% 43%, rgba(123, 63, 242, 0.08) 0%, transparent 65%);
+  --auth-dot-grid: radial-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+}
+
+

@@ -1,56 +1,73 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { assessPPDTStory } from '@/lib/gemini';
-import fs from 'fs';
-import path from 'path';
+import { evaluatePPDTStory } from '@/lib/assessor/assessorService';
+import { MissingApiKeyError } from '@/lib/transcriber/errors';
+
+export const maxDuration = 60; // Allow sufficient time for deep assessment
+
+// In-memory idempotency cache for active/recent request IDs
+const activeRequests = new Map<string, Promise<any>>();
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { storyTranscript, picturePath } = body;
+    const { 
+      storyTranscript, 
+      storyText,
+      boxAndHeading,
+      pictureId = 'ppdt-01',
+      studentConcern,
+      requestId 
+    } = body;
 
-    if (!storyTranscript || storyTranscript.trim().length < 15) {
+    const targetStory = storyText || storyTranscript || '';
+    if (!targetStory || targetStory.trim().length < 20) {
       return NextResponse.json(
-        { error: 'A valid story transcript (at least 15 characters) is required for assessment.' },
+        { error: 'A valid story transcript (at least 20 characters) is required for assessment.' },
         { status: 400 }
       );
     }
 
-    let stimulusBase64: string | null = null;
-    let stimulusMimeType: string | null = null;
+    const customKey = req.headers.get('x-gemini-key');
 
-    if (picturePath) {
-      try {
-        // e.g. picturePath = "/pictures/ppdt_stimulus_01.jpg"
-        const cleanPath = picturePath.startsWith('/') ? picturePath.slice(1) : picturePath;
-        const fullLocalPath = path.join(process.cwd(), 'public', cleanPath);
-        if (fs.existsSync(fullLocalPath)) {
-          const fileBuffer = fs.readFileSync(fullLocalPath);
-          stimulusBase64 = fileBuffer.toString('base64');
-          stimulusMimeType = cleanPath.endsWith('.png') ? 'image/png' : 'image/jpeg';
-        }
-      } catch (err) {
-        console.warn('Could not read stimulus image from disk:', err);
-      }
+    // Idempotency guard: prevent duplicate parallel evaluations on rapid clicks
+    const idKey = requestId || `${pictureId}-${targetStory.substring(0, 30)}`;
+    if (activeRequests.has(idKey)) {
+      const existingResult = await activeRequests.get(idKey);
+      return NextResponse.json({
+        success: true,
+        feedback: existingResult,
+      });
     }
 
-    const customKey = req.headers.get('x-gemini-key');
-    const feedback = await assessPPDTStory(
-      storyTranscript,
-      stimulusBase64,
-      stimulusMimeType,
-      customKey
-    );
-
-    return NextResponse.json({
-      success: true,
-      feedback,
+    const evalPromise = evaluatePPDTStory({
+      pictureId,
+      confirmedStoryText: targetStory,
+      boxAndHeading,
+      studentConcern,
+      customKey,
     });
+
+    activeRequests.set(idKey, evalPromise);
+
+    try {
+      const feedback = await evalPromise;
+      return NextResponse.json({
+        success: true,
+        feedback,
+      });
+    } finally {
+      // Clear from active requests after completion
+      setTimeout(() => activeRequests.delete(idKey), 5000);
+    }
   } catch (error: any) {
-    console.error('Assessment API error:', error);
+    console.error('Assessment API error:', error.message);
+    const status = error instanceof MissingApiKeyError ? 503 : 500;
     return NextResponse.json(
-      { error: error.message || 'Failed to complete story assessment' },
-      { status: 500 }
+      { 
+        success: false, 
+        error: error.message || 'Failed to complete story assessment' 
+      },
+      { status }
     );
   }
 }
-

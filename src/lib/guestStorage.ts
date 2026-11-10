@@ -14,9 +14,22 @@ export interface StoredAttempt {
   pictureId: string;
   picturePath: string;
   date: string;
-  transcript: string;
+  transcript: string; // The confirmed transcript
+  ai_transcript?: string; // What the model initially returned
+  confirmed_transcript?: string; // What the student approved
+  box_and_heading?: string;
+  word_edit_rate?: number; // Edit rate between ai_transcript and confirmed_transcript
+  unclear_count?: number;
   feedback: any;
   score: number;
+  overall_score?: number;
+  ppdt_verdict?: 'Strong' | 'Average' | 'Weak' | string;
+  assessment_prompt_version?: string;
+  assessment_prompt_hash?: string;
+  assessment_model?: string;
+  story_word_count?: number;
+  student_concern?: string | null;
+  assessment_json?: any;
 }
 
 export interface DailyUsage {
@@ -94,6 +107,19 @@ export function canAttemptToday(): boolean {
   return usage.count < usage.limit;
 }
 
+export function clearGuest(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(GUEST_KEY);
+  }
+}
+
+export function clearAttempts(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(ATTEMPTS_KEY);
+  }
+  fetch('/api/attempts', { method: 'DELETE' }).catch(() => {});
+}
+
 export function getStoredAttempts(): StoredAttempt[] {
   if (typeof window === 'undefined') return [];
   const raw = localStorage.getItem(ATTEMPTS_KEY);
@@ -104,6 +130,8 @@ export function getStoredAttempts(): StoredAttempt[] {
     return [];
   }
 }
+
+export const getAttempts = getStoredAttempts;
 
 export function saveAttempt(attempt: Omit<StoredAttempt, 'id' | 'date'>): StoredAttempt {
   const fullAttempt: StoredAttempt = {
@@ -117,6 +145,18 @@ export function saveAttempt(attempt: Omit<StoredAttempt, 'id' | 'date'>): Stored
     localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(list));
   }
   incrementDailyUsage();
+
+  // Save to server database asynchronously
+  if (typeof window !== 'undefined') {
+    fetch('/api/attempts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ attempt: fullAttempt }),
+    }).catch(() => {});
+
+    fetch('/api/usage?type=ppdt', { method: 'POST' }).catch(() => {});
+  }
+
   return fullAttempt;
 }
 
@@ -124,8 +164,6 @@ export function getAttemptById(id: string): StoredAttempt | null {
   const list = getStoredAttempts();
   return list.find(a => a.id === id) || null;
 }
-
-
 
 export interface PictureGridItem {
   pictureNumber: number;
@@ -145,43 +183,15 @@ export function getPictureGridData(): PictureGridItem[] {
     const picNum = idx + 1;
     const picAttempts = attempts.filter(a => a.pictureId === pic.id);
     const attempted = picAttempts.length > 0;
-
-    let lastScore: string | null = null;
-    let lastAttemptedAt: string | null = null;
-    let lastAttemptId: string | null = null;
-
-    if (attempted) {
-      const latest = picAttempts[0];
-      lastAttemptId = latest.id;
-      if (typeof latest.score === 'number' && !isNaN(latest.score)) {
-        lastScore = `${latest.score}/10`;
-      } else if (latest.feedback?.overallScore) {
-        lastScore = `${latest.feedback.overallScore}/10`;
-      } else {
-        lastScore = 'Attempted';
-      }
-
-      if (latest.date) {
-        try {
-          const d = new Date(latest.date);
-          lastAttemptedAt = d.toLocaleDateString('en-GB', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          });
-        } catch {
-          lastAttemptedAt = latest.date;
-        }
-      }
-    }
+    const lastAttempt = attempted ? picAttempts[0] : null;
 
     return {
       pictureNumber: picNum,
       pictureId: pic.id,
       attempted,
-      lastScore,
-      lastAttemptedAt,
-      lastAttemptId,
+      lastScore: lastAttempt ? lastAttempt.score.toFixed(1) : null,
+      lastAttemptedAt: lastAttempt ? lastAttempt.date : null,
+      lastAttemptId: lastAttempt ? lastAttempt.id : null,
       attemptCount: picAttempts.length,
     };
   });

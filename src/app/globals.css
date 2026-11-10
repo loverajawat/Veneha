@@ -82,16 +82,103 @@
     color: var(--color-charcoal);
   }
 
-  /* Accessible Focus Ring: 2px primary with 2px offset on all interactive elements */
+  /* Accessible Focus Ring: 2px primary with 2px offset on all interactive elements unless overridden */
   a:focus-visible,
   button:focus-visible,
-  input:focus-visible,
+  input:focus-visible:not(.auth-input),
   textarea:focus-visible,
   select:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--color-primary) !important;
-    outline-offset: 2px !important;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
+}
+
+/* ==========================================================================
+   Auth Portal Component & Animation Styles
+   ========================================================================== */
+
+/* Auth smooth theme transition */
+.auth-theme-transition {
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Auth Input Styling */
+.auth-input {
+  background-color: var(--auth-bg-input);
+  border: 1px solid var(--auth-border-input);
+  color: var(--auth-text-input);
+  border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 200ms ease, color 200ms ease;
+}
+
+.auth-input:hover {
+  border-color: var(--auth-border-input-hover);
+}
+
+.auth-input:focus,
+.auth-input:focus-visible {
+  outline: none !important;
+  border-color: var(--auth-border-input-focus) !important;
+  box-shadow: 0 0 0 3px var(--auth-ring-input-focus) !important;
+}
+
+.auth-input.auth-input-error,
+.auth-input.auth-input-error:focus,
+.auth-input.auth-input-error:focus-visible {
+  border-color: var(--color-semantic-error) !important;
+  box-shadow: 0 0 0 3px rgba(224, 49, 49, 0.25) !important;
+}
+
+/* Browser autofill override: no yellow/white boxes */
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus,
+.auth-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--auth-text-input) !important;
+  -webkit-box-shadow: 0 0 0 1000px var(--auth-bg-input) inset !important;
+  box-shadow: 0 0 0 1000px var(--auth-bg-input) inset !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+
+/* Splash entry stagger animation (fade and rise 12px) */
+@keyframes authFadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-auth-fade-rise-1 {
+  animation: authFadeRise 380ms cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards;
+}
+
+.animate-auth-fade-rise-2 {
+  animation: authFadeRise 380ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards;
+}
+
+.animate-auth-fade-rise-3 {
+  animation: authFadeRise 380ms cubic-bezier(0.16, 1, 0.3, 1) 160ms forwards;
+}
+
+/* Soft entrance for right panel: slides in 24px while fading */
+@keyframes authSlideFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-auth-panel-enter {
+  animation: authSlideFadeIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* Hero Display Type Scale (responsive) */

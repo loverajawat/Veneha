@@ -1,0 +1,8 @@
+{
+  "sample_id": "sample_01",
+  "box_and_heading": "[box: M / 0 / 22]  Action: Saving Village Crops from Storm.",
+  "story_text": "Vikram a 23 yeold agriculture student, was returning to his village from his family fields when a sudden, severe windstorm struck the area. Realizing the intensity of the gale, Vikram immediately thought of the freshly harvested wheat stored under temporary tarpaulin sheds at the village Community Centre, which were highly vulnerable to such winds.\n\nPushing quickly against heavy gusts, Vikram made his way to centre. He saw the tarpulins violently flapping and threating to tear away. He immediately called out to three local youths who were running",
+  "must_match": ["Vikram", "23", "three"],
+  "notes": "\"was\" is crossed out before \"saw\". Page ends mid-sentence. The box shows M, 0, 22 (age 22 differs from the 23 in the story; keep both as written)."
+}
+

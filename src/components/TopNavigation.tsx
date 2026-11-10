@@ -13,11 +13,15 @@ import {
   Flame, 
   ChevronDown, 
   Settings,
-  History
+  History,
+  LogIn,
+  LogOut,
+  FileText
 } from 'lucide-react';
 import { getGuest, getDailyUsage, GuestProfile, DailyUsage } from '@/lib/guestStorage';
 import { getWatDailyUsage, WatDailyUsage, WAT_DAILY_LIMIT } from '@/lib/watStorage';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { siteConfig } from '@/config/siteConfig';
 import GuestModal from './GuestModal';
 import SettingsModal from './SettingsModal';
@@ -25,6 +29,7 @@ import SettingsModal from './SettingsModal';
 export default function TopNavigation() {
   const pathname = usePathname();
   const { lang, setLang } = useLanguage();
+  const { user, guest: authGuest, isUser, isGuest, signOut, updateDisplayName } = useAuth();
 
   const [guest, setGuest] = useState<GuestProfile | null>(null);
   const [dailyUsage, setDailyUsage] = useState<DailyUsage>({ date: '', count: 0, limit: 5 });
@@ -367,9 +372,11 @@ export default function TopNavigation() {
               aria-label="Cadet profile options"
             >
               <div className="w-5 h-5 rounded-full bg-card-tint-lavender text-brand-purple-800 flex items-center justify-center text-xs font-bold shrink-0">
-                {guest ? guest.name.charAt(0).toUpperCase() : 'C'}
+                {(isUser && user ? user.displayName : guest ? guest.name : 'C').charAt(0).toUpperCase()}
               </div>
-              <span className="max-w-[120px] truncate">{guest ? guest.name : 'Cadet'}</span>
+              <span className="max-w-[120px] truncate">
+                {isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
+              </span>
               <ChevronDown className={`w-3.5 h-3.5 text-steel transition-transform shrink-0 ${showProfileDropdown ? 'rotate-180' : ''}`} />
             </button>
 
@@ -377,12 +384,18 @@ export default function TopNavigation() {
               <div className="absolute right-0 mt-2 w-64 bg-canvas rounded-lg p-4 shadow-level4 border border-hairline space-y-3 z-50 text-ink animate-fade-in">
                 <div className="pb-2 border-b border-hairline">
                   <div className="font-semibold text-[15px] text-ink truncate">
-                    {guest ? guest.name : 'Guest Cadet'}
+                    {isUser && user ? user.displayName : guest ? guest.name : 'Guest Cadet'}
                   </div>
-                  <div className="inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-sm bg-card-tint-mint text-brand-green text-[12px] font-medium">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
-                    Practice mode active
-                  </div>
+                  {isUser && user ? (
+                    <div className="text-[12px] text-slate truncate mt-0.5">
+                      {user.email}
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-sm bg-card-tint-mint text-brand-green text-[12px] font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                      Practice mode active
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">
@@ -395,8 +408,25 @@ export default function TopNavigation() {
                     className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
                   >
                     <Pencil className="w-4 h-4 text-steel" />
-                    <span>Change callsign / name</span>
+                    <span>
+                      {isUser
+                        ? (lang === 'hi' ? siteConfig.auth.profileMenu.editName.hi : siteConfig.auth.profileMenu.editName.en)
+                        : 'Change callsign / name'}
+                    </span>
                   </button>
+
+                  {!isUser && (
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setShowProfileDropdown(false)}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-primary hover:bg-surface rounded-md transition-colors cursor-pointer text-left font-medium"
+                    >
+                      <LogIn className="w-4 h-4 text-primary" />
+                      <span>
+                        {lang === 'hi' ? siteConfig.auth.profileMenu.signInOrCreate.hi : siteConfig.auth.profileMenu.signInOrCreate.en}
+                      </span>
+                    </Link>
+                  )}
 
                   <Link
                     href="/history"
@@ -418,12 +448,37 @@ export default function TopNavigation() {
                     <Settings className="w-4 h-4 text-steel" />
                     <span>API Key Settings</span>
                   </button>
+
+                  <Link
+                    href="/privacy"
+                    onClick={() => setShowProfileDropdown(false)}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
+                  >
+                    <FileText className="w-4 h-4 text-steel" />
+                    <span>Privacy Note</span>
+                  </Link>
+
+                  {isUser && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProfileDropdown(false);
+                        signOut();
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-md transition-colors cursor-pointer text-left pt-2 border-t border-hairline mt-1"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>
+                        {lang === 'hi' ? siteConfig.auth.profileMenu.signOut.hi : siteConfig.auth.profileMenu.signOut.en}
+                      </span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Privacy Line */}
                 <div className="pt-2 border-t border-hairline flex items-center gap-1.5 text-[12px] text-slate">
                   <Lock className="w-3.5 h-3.5 text-semantic-success shrink-0" />
-                  <span>Handwriting deleted after OCR</span>
+                  <span>Photos not saved by Veneha</span>
                 </div>
               </div>
             )}
@@ -561,20 +616,46 @@ export default function TopNavigation() {
             {/* Profile & Settings section in Drawer */}
             <div className="pt-2 border-t border-hairline space-y-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-[15px] text-ink">{guest ? guest.name : 'Cadet'}</div>
-                  <div className="text-[12px] text-slate">Practice mode active</div>
+                <div className="min-w-0 pr-2">
+                  <div className="font-semibold text-[15px] text-ink truncate">
+                    {isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
+                  </div>
+                  <div className="text-[12px] text-slate truncate">
+                    {isUser && user ? user.email : 'Practice mode active'}
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setShowGuestModal(true);
-                  }}
-                  className="px-3 py-1.5 rounded-md border border-hairline bg-canvas text-[13px] font-medium text-charcoal hover:bg-surface"
-                >
-                  Change Name
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setShowGuestModal(true);
+                    }}
+                    className="px-2.5 py-1.5 rounded-md border border-hairline bg-canvas text-[12px] font-medium text-charcoal hover:bg-surface"
+                  >
+                    {isUser ? 'Edit Name' : 'Change Name'}
+                  </button>
+                  {isUser ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        signOut();
+                      }}
+                      className="px-2.5 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-[12px] font-medium text-rose-600 hover:bg-rose-100"
+                    >
+                      Sign Out
+                    </button>
+                  ) : (
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="px-2.5 py-1.5 rounded-md bg-primary text-[12px] font-medium text-white hover:bg-primary-pressed"
+                    >
+                      Sign In
+                    </Link>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-2">
@@ -589,10 +670,14 @@ export default function TopNavigation() {
                   API Key Settings
                 </button>
 
-                <div className="flex items-center gap-1.5 text-[12px] text-slate">
+                <Link
+                  href="/privacy"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-1.5 text-[12px] text-slate hover:text-ink"
+                >
                   <Lock className="w-3.5 h-3.5 text-semantic-success" />
-                  <span>Photos deleted after OCR</span>
-                </div>
+                  <span>Privacy Note</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -602,10 +687,14 @@ export default function TopNavigation() {
       {/* Guest Name Modal */}
       {showGuestModal && (
         <GuestModal
-          currentGuest={guest}
+          currentGuest={isUser && user ? { id: user.id, name: user.displayName, createdAt: user.createdAt } : guest}
           onClose={() => setShowGuestModal(false)}
           onSaved={(newProfile) => {
-            setGuest(newProfile);
+            if (isUser) {
+              updateDisplayName(newProfile.name);
+            } else {
+              setGuest(newProfile);
+            }
             setShowGuestModal(false);
           }}
         />
