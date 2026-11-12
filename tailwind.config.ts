@@ -15,6 +15,7 @@ const config: Config = {
           deep: "var(--color-primary-deep)",
         },
         "on-primary": "var(--color-on-primary)",
+        "on-ink-deep": "var(--color-on-ink-deep)",
         "brand-navy": {
           DEFAULT: "var(--color-brand-navy)",
           deep: "var(--color-brand-navy-deep)",

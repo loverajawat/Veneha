@@ -52,6 +52,7 @@
   --color-muted: #bbb8b1;
   --color-on-dark: #ffffff;
   --color-on-dark-muted: #a4a097;
+  --color-on-ink-deep: #ffffff;
 
   /* Semantic */
   --color-semantic-success: #1aae39;
@@ -91,6 +92,46 @@
   /* Font stack */
   --font-stack: "Notion Sans", Inter, -apple-system, system-ui, "Segoe UI", "Noto Sans Devanagari", Helvetica, sans-serif;
   --font-hindi-stack: "Noto Sans Devanagari", "Notion Sans", Inter, sans-serif;
+}
+
+/* ==========================================================================
+   Dark Theme Tokens (Main Application)
+   ========================================================================== */
+[data-theme="dark"] {
+  /* Surface */
+  --color-canvas: #0c1017;
+  --color-surface: #151c28;
+  --color-surface-soft: #111722;
+  --color-hairline: #222c3d;
+  --color-hairline-soft: #19212e;
+  --color-hairline-strong: #334155;
+
+  /* Text */
+  --color-ink-deep: #ffffff;
+  --color-on-ink-deep: #000000;
+  --color-ink: #f8fafc;
+  --color-charcoal: #e2e8f0;
+  --color-slate: #94a3b8;
+  --color-steel: #64748b;
+  --color-stone: #475569;
+  --color-muted: #334155;
+
+  /* Card Tints in dark mode */
+  --color-card-tint-peach: #291a14;
+  --color-card-tint-rose: #2b1522;
+  --color-card-tint-mint: #13271d;
+  --color-card-tint-lavender: #211a33;
+  --color-card-tint-sky: #132338;
+  --color-card-tint-yellow: #292212;
+  --color-card-tint-yellow-bold: #33280f;
+  --color-card-tint-cream: #1e1d15;
+  --color-card-tint-gray: #18202c;
+
+  /* Shadows */
+  --shadow-level-1: 0px 1px 3px 0px rgba(0, 0, 0, 0.4);
+  --shadow-level-2: 0px 4px 12px 0px rgba(0, 0, 0, 0.5);
+  --shadow-level-3: 0px 24px 48px -8px rgba(0, 0, 0, 0.7);
+  --shadow-level-4: 0px 16px 48px -8px rgba(0, 0, 0, 0.6);
 }
 
 /* ==========================================================================

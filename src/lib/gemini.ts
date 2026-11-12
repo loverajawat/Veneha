@@ -63,7 +63,7 @@ export async function transcribeHandwrittenStory(
       },
     ],
     generationConfig: {
-      maxOutputTokens: 3000,
+      maxOutputTokens: 16000,
     },
   };
 
@@ -83,7 +83,17 @@ export async function transcribeHandwrittenStory(
     }
 
     const result = await response.json();
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+    // Newer Gemini models (3.x+) may have thinking parts before content — pick the last text part
+    const contentParts = result.candidates?.[0]?.content?.parts;
+    let text: string | undefined;
+    if (Array.isArray(contentParts)) {
+      for (let p = contentParts.length - 1; p >= 0; p--) {
+        if (contentParts[p]?.text) {
+          text = contentParts[p].text;
+          break;
+        }
+      }
+    }
     if (!text) {
       throw mapToTranscriptionError({
         message: 'Gemini returned an empty response for transcription.',
@@ -164,7 +174,7 @@ export async function assessPPDTStory(
     contents: [{ parts }],
     generationConfig: {
       responseMimeType: 'application/json',
-      maxOutputTokens: 3000,
+      maxOutputTokens: 16000,
     },
   };
 
@@ -183,7 +193,17 @@ export async function assessPPDTStory(
   }
 
   const result = await response.json();
-  const rawJson = result.candidates?.[0]?.content?.parts?.[0]?.text;
+  // Pick the last text part (thinking models put thought parts first)
+  const assessParts = result.candidates?.[0]?.content?.parts;
+  let rawJson: string | undefined;
+  if (Array.isArray(assessParts)) {
+    for (let p = assessParts.length - 1; p >= 0; p--) {
+      if (assessParts[p]?.text) {
+        rawJson = assessParts[p].text;
+        break;
+      }
+    }
+  }
   if (!rawJson) {
     throw new Error('Gemini returned an empty assessment response.');
   }

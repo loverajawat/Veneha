@@ -63,13 +63,13 @@ export async function POST(req: NextRequest) {
       db.prepare(`
         INSERT INTO daily_usage (id, user_id, guest_id, usage_type, date, count, limit_val)
         VALUES (?, ?, NULL, ?, ?, 1, ?)
-        ON CONFLICT(user_id, usage_type, date) DO UPDATE SET count = count + 1
+        ON CONFLICT(id) DO UPDATE SET count = count + 1
       `).run(id, owner.userId, usageType, today, limitVal);
     } else {
       db.prepare(`
         INSERT INTO daily_usage (id, user_id, guest_id, usage_type, date, count, limit_val)
         VALUES (?, NULL, ?, ?, ?, 1, ?)
-        ON CONFLICT(guest_id, usage_type, date) DO UPDATE SET count = count + 1
+        ON CONFLICT(id) DO UPDATE SET count = count + 1
       `).run(id, owner.guestId, usageType, today, limitVal);
     }
 

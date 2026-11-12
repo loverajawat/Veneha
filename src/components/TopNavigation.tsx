@@ -16,7 +16,9 @@ import {
   History,
   LogIn,
   LogOut,
-  FileText
+  FileText,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { getGuest, getDailyUsage, GuestProfile, DailyUsage } from '@/lib/guestStorage';
 import { getWatDailyUsage, WatDailyUsage, WAT_DAILY_LIMIT } from '@/lib/watStorage';
@@ -43,6 +45,49 @@ export default function TopNavigation() {
 
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
+
+  // Sync theme with document & localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('veneha-theme');
+      const current = document.documentElement.getAttribute('data-theme');
+      if (saved === 'dark' || saved === 'light') {
+        setTheme(saved);
+      } else if (current === 'dark' || current === 'light') {
+        setTheme(current);
+      }
+    } catch {}
+
+    const handleThemeChange = () => {
+      try {
+        const saved = localStorage.getItem('veneha-theme');
+        const current = document.documentElement.getAttribute('data-theme');
+        if (saved === 'dark' || saved === 'light') {
+          setTheme(saved);
+        } else if (current === 'dark' || current === 'light') {
+          setTheme(current);
+        }
+      } catch {}
+    };
+
+    window.addEventListener('storage', handleThemeChange);
+    window.addEventListener('theme-change', handleThemeChange);
+    return () => {
+      window.removeEventListener('storage', handleThemeChange);
+      window.removeEventListener('theme-change', handleThemeChange);
+    };
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem('veneha-theme', nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      window.dispatchEvent(new Event('theme-change'));
+    } catch {}
+  };
 
   const usageRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -331,14 +376,14 @@ export default function TopNavigation() {
             )}
           </div>
 
-          {/* Language Toggle (Two pill tabs, active one black) */}
+          {/* Language Toggle (Two pill tabs, active one high-contrast) */}
           <div className="inline-flex items-center rounded-full border border-hairline bg-surface p-0.5">
             <button
               type="button"
               onClick={() => setLang('en')}
               className={`px-3 py-1 text-[13px] font-semibold rounded-full transition-all cursor-pointer ${
                 lang === 'en'
-                  ? 'bg-ink-deep text-on-dark shadow-sm'
+                  ? 'bg-ink-deep text-on-ink-deep shadow-sm'
                   : 'text-steel hover:text-ink bg-transparent'
               }`}
               aria-label="English"
@@ -350,7 +395,7 @@ export default function TopNavigation() {
               onClick={() => setLang('hi')}
               className={`px-3 py-1 text-[13px] font-semibold rounded-full transition-all cursor-pointer ${
                 lang === 'hi'
-                  ? 'bg-ink-deep text-on-dark shadow-sm'
+                  ? 'bg-ink-deep text-on-ink-deep shadow-sm'
                   : 'text-steel hover:text-ink bg-transparent'
               }`}
               aria-label="हिंदी"
@@ -396,6 +441,38 @@ export default function TopNavigation() {
                       Practice mode active
                     </div>
                   )}
+                </div>
+
+                {/* Dark Mode Toggle Option (marked by arrow) */}
+                <div className="pb-1 border-b border-hairline">
+                  <button
+                    type="button"
+                    onClick={toggleTheme}
+                    className="w-full flex items-center justify-between px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                    role="switch"
+                    aria-checked={theme === 'dark'}
+                    aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  >
+                    <div className="flex items-center gap-2">
+                      {theme === 'dark' ? (
+                        <Moon className="w-4 h-4 text-brand-purple-300" />
+                      ) : (
+                        <Sun className="w-4 h-4 text-brand-yellow" />
+                      )}
+                      <span className="font-medium text-ink">
+                        {lang === 'hi' ? siteConfig.auth.profileMenu.darkMode.hi : siteConfig.auth.profileMenu.darkMode.en}
+                      </span>
+                    </div>
+
+                    {/* Smooth Pill Switch */}
+                    <div
+                      className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out flex items-center ${
+                        theme === 'dark' ? 'bg-primary justify-end' : 'bg-hairline-strong justify-start'
+                      }`}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200" />
+                    </div>
+                  </button>
                 </div>
 
                 <div className="space-y-1">
@@ -656,6 +733,32 @@ export default function TopNavigation() {
                     </Link>
                   )}
                 </div>
+              </div>
+
+              {/* Dark Mode in Drawer */}
+              <div className="flex items-center justify-between py-1 px-1 border-t border-hairline">
+                <div className="flex items-center gap-2">
+                  {theme === 'dark' ? (
+                    <Moon className="w-4 h-4 text-brand-purple-300" />
+                  ) : (
+                    <Sun className="w-4 h-4 text-brand-yellow" />
+                  )}
+                  <span className="text-[14px] font-medium text-ink">
+                    {lang === 'hi' ? siteConfig.auth.profileMenu.darkMode.hi : siteConfig.auth.profileMenu.darkMode.en}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  role="switch"
+                  aria-checked={theme === 'dark'}
+                  aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                  className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out flex items-center cursor-pointer ${
+                    theme === 'dark' ? 'bg-primary justify-end' : 'bg-hairline-strong justify-start'
+                  }`}
+                >
+                  <div className="w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200" />
+                </button>
               </div>
 
               <div className="flex items-center justify-between pt-2">

@@ -126,6 +126,9 @@ export function mapToTranscriptionError(err: any): TranscriptionError {
   if (status === 429 || msg.includes('RESOURCE_EXHAUSTED') || msg.includes('quota') || msg.includes('rate limit')) {
     return new RateLimitError();
   }
+  if (status === 404 || msg.includes('NOT_FOUND') || msg.includes('no longer available') || msg.includes('is not found')) {
+    return new ModelUnavailableError();
+  }
   if (status === 503 || status === 504 || msg.includes('UNAVAILABLE') || msg.includes('DEADLINE_EXCEEDED')) {
     return new ModelUnavailableError();
   }

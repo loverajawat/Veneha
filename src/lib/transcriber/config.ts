@@ -4,15 +4,18 @@
  */
 
 export const TRANSCRIBER_CONFIG = {
-  // Multimodal Flash-class Gemini model
-  MODEL_NAME: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+  // Multimodal Flash-class Gemini model (fast lite tier with high reliability)
+  MODEL_NAME: process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
   
+  // Resilient fallback models when Google experiences high-demand spikes
+  FALLBACK_MODELS: ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'],
+
   // Resolution setting for media input (if supported by SDK / endpoint)
   MEDIA_RESOLUTION: 'high' as const,
   
-  // Image preparation settings for browser before upload
-  MAX_LONG_EDGE_PX: 2000,
-  JPEG_QUALITY: 0.85,
+  // Image preparation settings for browser before upload (1400px @ 80% is optimal for handwriting OCR)
+  MAX_LONG_EDGE_PX: 1400,
+  JPEG_QUALITY: 0.80,
   
   // Number of independent transcription passes (1 = standard, 2 = comparative double-pass)
   TRANSCRIBE_PASSES: Number(process.env.TRANSCRIBE_PASSES || 1),

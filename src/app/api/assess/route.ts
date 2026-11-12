@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { evaluatePPDTStory } from '@/lib/assessor/assessorService';
 import { MissingApiKeyError } from '@/lib/transcriber/errors';
 
-export const maxDuration = 60; // Allow sufficient time for deep assessment
+export const maxDuration = 120; // Allow sufficient time for deep assessment and potential retry
 
 // In-memory idempotency cache for active/recent request IDs
 const activeRequests = new Map<string, Promise<any>>();

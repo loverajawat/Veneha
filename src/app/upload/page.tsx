@@ -419,7 +419,9 @@ export default function UploadPage() {
         throw new Error(data.error || 'Transcription failed');
       }
 
-      sessionStorage.setItem('current_story_transcript', data.transcript);
+      sessionStorage.setItem('current_story_transcript', data.transcript || '');
+      sessionStorage.setItem('current_story_box', data.box_and_heading || '');
+      sessionStorage.setItem('current_story_text', data.story_text || '');
       router.push('/transcribe');
     } catch (err: any) {
       console.error('Transcription error:', err);

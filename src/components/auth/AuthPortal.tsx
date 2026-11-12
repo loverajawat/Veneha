@@ -72,20 +72,30 @@ export default function AuthPortal({ initialOpen = false }: AuthPortalProps) {
 
   // Restore theme preference from localStorage with key 'veneha-theme'
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('veneha-theme');
-      const currentAttr = document.documentElement.getAttribute('data-theme');
-      if (saved === 'light' || saved === 'dark') {
-        setTheme(saved);
-        if (currentAttr !== saved) {
-          document.documentElement.setAttribute('data-theme', saved);
+    const syncTheme = () => {
+      try {
+        const saved = localStorage.getItem('veneha-theme');
+        const currentAttr = document.documentElement.getAttribute('data-theme');
+        if (saved === 'light' || saved === 'dark') {
+          setTheme(saved);
+          if (currentAttr !== saved) {
+            document.documentElement.setAttribute('data-theme', saved);
+          }
+        } else if (currentAttr === 'light' || currentAttr === 'dark') {
+          setTheme(currentAttr);
+        } else {
+          document.documentElement.setAttribute('data-theme', 'dark');
         }
-      } else if (currentAttr === 'light' || currentAttr === 'dark') {
-        setTheme(currentAttr);
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } catch {}
+      } catch {}
+    };
+
+    syncTheme();
+    window.addEventListener('storage', syncTheme);
+    window.addEventListener('theme-change', syncTheme);
+    return () => {
+      window.removeEventListener('storage', syncTheme);
+      window.removeEventListener('theme-change', syncTheme);
+    };
   }, []);
 
   const toggleTheme = () => {
@@ -94,6 +104,7 @@ export default function AuthPortal({ initialOpen = false }: AuthPortalProps) {
     try {
       localStorage.setItem('veneha-theme', nextTheme);
       document.documentElement.setAttribute('data-theme', nextTheme);
+      window.dispatchEvent(new Event('theme-change'));
     } catch {}
   };
 

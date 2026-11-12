@@ -229,8 +229,8 @@ export default function TranscribePage() {
         ? computeWER(aiRawTranscript, confirmedFullTranscript)
         : 0;
 
-      const overallScore = data.feedback?.final_assessment?.overall_score ?? data.feedback?.summaryRating?.overallScore ?? 5.0;
-      const verdict = data.feedback?.ppdt_suitability?.verdict || 'Average';
+      const overallScore = data.feedback?.scores?.overall ?? data.feedback?.final_assessment?.overall_score ?? 5.0;
+      const verdict = data.feedback?.suitability?.verdict || data.feedback?.ppdt_suitability?.verdict || 'Average';
 
       const guest = getGuest();
       const savedAttempt = saveAttempt({

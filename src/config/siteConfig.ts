@@ -434,6 +434,10 @@ export const siteConfig = {
         en: 'Edit name',
         hi: 'नाम बदलें',
       },
+      darkMode: {
+        en: 'Dark mode',
+        hi: 'डार्क मोड',
+      },
     },
   },
 };

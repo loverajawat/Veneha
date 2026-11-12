@@ -2,17 +2,20 @@
  * Configuration for the PPDT Assessment Engine.
  */
 export const ASSESSOR_CONFIG = {
-  // Model name: Flash-class or Pro-class
-  ASSESSMENT_MODEL: process.env.ASSESSMENT_MODEL || 'gemini-2.5-flash',
+  // Fast, responsive Flash model with high global availability
+  ASSESSMENT_MODEL: process.env.ASSESSMENT_MODEL || 'gemini-3.1-flash-lite',
   
+  // Resilient fallback models when Google experiences high-demand spikes
+  FALLBACK_MODELS: ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'],
+
   // High reasoning / thinking where supported
   REASONING_EFFORT: (process.env.ASSESSMENT_REASONING || 'high') as 'low' | 'medium' | 'high',
   
-  // Output token limit - must be large enough to prevent cutoffs
-  ASSESSMENT_MAX_OUTPUT_TOKENS: 6000,
+  // Output token limit
+  ASSESSMENT_MAX_OUTPUT_TOKENS: 8192,
   
-  // Timeout in milliseconds (deep assessment with quotes & 12 OLQs needs ~90s)
-  ASSESSMENT_TIMEOUT_MS: 90000,
+  // Timeout in milliseconds (120s buffer for deep evaluation + single corrective pass)
+  ASSESSMENT_TIMEOUT_MS: 120000,
   
   // Minimum story words to evaluate
   MIN_STORY_WORDS: 25,

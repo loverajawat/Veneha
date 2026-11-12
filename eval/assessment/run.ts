@@ -56,14 +56,15 @@ async function runAssessorEvaluation() {
           confirmedStoryText: tc.story,
         });
 
-        const overall = assessment.final_assessment?.overall_score || 0;
-        const verdict = assessment.ppdt_suitability?.verdict || 'Unknown';
+        const overall = (assessment as any).scores?.overall ?? (assessment as any).final_assessment?.overall_score ?? 0;
+        const verdict = (assessment as any).suitability?.verdict ?? (assessment as any).ppdt_suitability?.verdict ?? 'Unknown';
         const inRange = overall >= tc.expected_overall_range[0] && overall <= tc.expected_overall_range[1];
         const verdictMatch = verdict.toLowerCase() === tc.expected_verdict.toLowerCase();
 
         // Count quotes verified
-        const olqQuotes = assessment.olq_perspective?.filter((o) => o.quote) || [];
-        const verifiedOlq = olqQuotes.filter((o) => o.quote_verified).length;
+        const olqList: any[] = (assessment as any).olq ?? (assessment as any).olq_perspective ?? [];
+        const olqQuotes = olqList.filter((o: any) => o.quote);
+        const verifiedOlq = olqQuotes.filter((o: any) => o.quote).length;
 
         results.push({
           id: tc.id,
@@ -74,7 +75,7 @@ async function runAssessorEvaluation() {
           inRange,
           verdictMatch,
           quotesVerified: `${verifiedOlq} / ${olqQuotes.length}`,
-          verdictBlunt: assessment.final_assessment?.verdict,
+          verdictBlunt: (assessment as any).verdict ?? (assessment as any).final_assessment?.verdict,
         });
 
         console.log(`✓ Overall Score: ${overall}/10 | Verdict: ${verdict} | Range: [${tc.expected_overall_range.join(', ')}]`);
