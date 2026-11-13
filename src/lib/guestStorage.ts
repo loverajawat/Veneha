@@ -98,6 +98,7 @@ export function incrementDailyUsage(): DailyUsage {
   usage.count += 1;
   if (typeof window !== 'undefined') {
     localStorage.setItem(USAGE_KEY, JSON.stringify(usage));
+    window.dispatchEvent(new Event('usage-updated'));
   }
   return usage;
 }
@@ -116,6 +117,7 @@ export function clearGuest(): void {
 export function clearAttempts(): void {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(ATTEMPTS_KEY);
+    window.dispatchEvent(new Event('attempts-updated'));
   }
   fetch('/api/attempts', { method: 'DELETE' }).catch(() => {});
 }
@@ -133,6 +135,13 @@ export function getStoredAttempts(): StoredAttempt[] {
 
 export const getAttempts = getStoredAttempts;
 
+export function saveStoredAttempts(list: StoredAttempt[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(list));
+    window.dispatchEvent(new Event('attempts-updated'));
+  }
+}
+
 export function saveAttempt(attempt: Omit<StoredAttempt, 'id' | 'date'>): StoredAttempt {
   const fullAttempt: StoredAttempt = {
     ...attempt,
@@ -143,6 +152,7 @@ export function saveAttempt(attempt: Omit<StoredAttempt, 'id' | 'date'>): Stored
   list.unshift(fullAttempt);
   if (typeof window !== 'undefined') {
     localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(list));
+    window.dispatchEvent(new Event('attempts-updated'));
   }
   incrementDailyUsage();
 
@@ -175,9 +185,9 @@ export interface PictureGridItem {
   attemptCount: number;
 }
 
-export function getPictureGridData(): PictureGridItem[] {
+export function getPictureGridData(customAttempts?: StoredAttempt[]): PictureGridItem[] {
   const activePictures = getActivePictures();
-  const attempts = getStoredAttempts();
+  const attempts = customAttempts ?? getStoredAttempts();
 
   return activePictures.map((pic, idx) => {
     const picNum = idx + 1;
@@ -185,11 +195,17 @@ export function getPictureGridData(): PictureGridItem[] {
     const attempted = picAttempts.length > 0;
     const lastAttempt = attempted ? picAttempts[0] : null;
 
+    let scoreFormatted: string | null = null;
+    if (lastAttempt) {
+      const numericScore = typeof lastAttempt.score === 'number' ? lastAttempt.score : (lastAttempt.overall_score ?? 0);
+      scoreFormatted = Number(numericScore).toFixed(1);
+    }
+
     return {
       pictureNumber: picNum,
       pictureId: pic.id,
       attempted,
-      lastScore: lastAttempt ? lastAttempt.score.toFixed(1) : null,
+      lastScore: scoreFormatted,
       lastAttemptedAt: lastAttempt ? lastAttempt.date : null,
       lastAttemptId: lastAttempt ? lastAttempt.id : null,
       attemptCount: picAttempts.length,

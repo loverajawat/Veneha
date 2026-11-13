@@ -74,6 +74,7 @@ export function incrementWatDailyUsage(): WatDailyUsage {
   usage.count += 1;
   if (typeof window !== 'undefined') {
     localStorage.setItem(WAT_USAGE_KEY, JSON.stringify(usage));
+    window.dispatchEvent(new Event('usage-updated'));
   }
   return usage;
 }

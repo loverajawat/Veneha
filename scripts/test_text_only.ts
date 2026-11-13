@@ -15,7 +15,7 @@ if (fs.existsSync('.env.local')) {
   }
 }
 
-async function testTextOnly(modelName) {
+async function testTextOnly(modelName: string) {
   console.log(`Testing text-only call to ${modelName}...`);
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
   const start = Date.now();

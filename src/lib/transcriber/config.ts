@@ -5,10 +5,10 @@
 
 export const TRANSCRIBER_CONFIG = {
   // Multimodal Flash-class Gemini model (fast lite tier with high reliability)
-  MODEL_NAME: process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+  MODEL_NAME: process.env.GEMINI_MODEL || 'gemini-flash-lite-latest',
   
   // Resilient fallback models when Google experiences high-demand spikes
-  FALLBACK_MODELS: ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash'],
+  FALLBACK_MODELS: ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite'],
 
   // Resolution setting for media input (if supported by SDK / endpoint)
   MEDIA_RESOLUTION: 'high' as const,

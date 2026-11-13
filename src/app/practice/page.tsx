@@ -1,13 +1,21 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Dices, AlertTriangle, ExternalLink, HelpCircle } from 'lucide-react';
-import { getPictureGridData, PictureGridItem, canAttemptToday } from '@/lib/guestStorage';
+import { Dices, AlertTriangle, ExternalLink, HelpCircle, LineChart } from 'lucide-react';
+import { 
+  getPictureGridData, 
+  PictureGridItem, 
+  canAttemptToday, 
+  getStoredAttempts, 
+  saveStoredAttempts, 
+  StoredAttempt 
+} from '@/lib/guestStorage';
 import { getActivePictures } from '@/data/pictures';
 import { useLanguage } from '@/context/LanguageContext';
 import { siteConfig } from '@/config/siteConfig';
+import ScoreAnalysisChart from '@/components/ScoreAnalysisChart';
 import { 
   Button, 
   PillTab, 
@@ -26,48 +34,84 @@ const cardTints = [
   'bg-card-tint-yellow',
 ];
 
-const initialItems: PictureGridItem[] = getActivePictures().map((p, idx) => ({
-  pictureNumber: idx + 1,
-  pictureId: p.id,
-  attempted: false,
-  lastScore: null,
-  lastAttemptedAt: null,
-  lastAttemptId: null,
-  attemptCount: 0,
-}));
-
 export default function PracticeGridPage() {
   const router = useRouter();
   const { lang } = useLanguage();
 
-  const [items, setItems] = useState<PictureGridItem[]>(initialItems);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'not-attempted' | 'attempted'>('all');
+  const [attempts, setAttempts] = useState<StoredAttempt[]>([]);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'not-attempted' | 'attempted' | 'chart'>('all');
   const [canAttempt, setCanAttempt] = useState(true);
 
-  const loadData = () => {
+  // Compute items dynamically from attempts (always 100% synchronized)
+  const items = useMemo(() => {
+    return getPictureGridData(attempts);
+  }, [attempts]);
+
+  const loadData = useCallback(() => {
     try {
-      const data = getPictureGridData();
-      setItems(data);
+      // 1. Synchronously read from local storage for instant zero-latency UI
+      const local = getStoredAttempts();
+      setAttempts(local);
       setCanAttempt(canAttemptToday());
+
+      // 2. Fetch server attempts to ensure full sync with active user/guest
+      fetch('/api/attempts')
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && Array.isArray(data.attempts)) {
+            const serverAttempts: StoredAttempt[] = data.attempts;
+
+            // If local storage is empty and server also has 0 attempts:
+            if (local.length === 0 && serverAttempts.length === 0) {
+              setAttempts([]);
+            } else if (local.length === 0 && serverAttempts.length > 0) {
+              // Server has attempts from account / cookie: sync to local
+              setAttempts(serverAttempts);
+              saveStoredAttempts(serverAttempts);
+            } else if (serverAttempts.length === 0 && local.length > 0) {
+              // Local has attempts, server has 0 (keep local attempts until synced)
+            } else if (serverAttempts.length > 0) {
+              // Merge deduplicated by id (newest date first)
+              const map = new Map<string, StoredAttempt>();
+              serverAttempts.forEach((a) => map.set(a.id, a));
+              local.forEach((a) => map.set(a.id, a));
+              const merged = Array.from(map.values()).sort(
+                (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+              );
+              setAttempts(merged);
+              saveStoredAttempts(merged);
+            }
+          }
+        })
+        .catch(() => {});
     } catch (err) {
       console.error('Failed to load picture grid:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
     if (typeof window !== 'undefined') {
       const sp = new URLSearchParams(window.location.search);
       const f = sp.get('filter');
-      if (f === 'not-attempted' || f === 'attempted' || f === 'all') {
-        setActiveFilter(f);
+      if (f === 'not-attempted' || f === 'attempted' || f === 'all' || f === 'chart') {
+        setActiveFilter(f as any);
       }
     }
-    window.addEventListener('focus', loadData);
-    return () => window.removeEventListener('focus', loadData);
-  }, []);
 
-  const handleFilterChange = (newFilter: 'all' | 'not-attempted' | 'attempted') => {
+    const handleUpdate = () => loadData();
+    window.addEventListener('attempts-updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('focus', handleUpdate);
+
+    return () => {
+      window.removeEventListener('attempts-updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('focus', handleUpdate);
+    };
+  }, [loadData]);
+
+  const handleFilterChange = (newFilter: 'all' | 'not-attempted' | 'attempted' | 'chart') => {
     setActiveFilter(newFilter);
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
@@ -186,6 +230,13 @@ export default function PracticeGridPage() {
           <PillTab active={activeFilter === 'attempted'} onClick={() => handleFilterChange('attempted')}>
             {lang === 'hi' ? t.attempted.hi : t.attempted.en} ({attemptedCount})
           </PillTab>
+          <PillTab active={activeFilter === 'chart'} onClick={() => handleFilterChange('chart')}>
+            <LineChart className="w-4 h-4 mr-1.5 inline transition-colors shrink-0" />
+            <span>{lang === 'hi' ? t.scoreChart?.hi || 'स्कोर चार्ट' : t.scoreChart?.en || 'Score Chart'}</span>
+            {attemptedCount > 0 && (
+              <span className="ml-1 opacity-70">({attemptedCount})</span>
+            )}
+          </PillTab>
         </div>
       </div>
 
@@ -201,8 +252,10 @@ export default function PracticeGridPage() {
         </div>
       </AccordionItem>
 
-      {/* 3. The Grid of Picture Blocks */}
-      {filteredItems.length === 0 ? (
+      {/* 3. Main Content: Either the Score Analysis Chart OR the Grid of Picture Blocks */}
+      {activeFilter === 'chart' ? (
+        <ScoreAnalysisChart items={items} attempts={attempts} lang={lang} />
+      ) : filteredItems.length === 0 ? (
         <div className="py-16 text-center text-slate space-y-3 bg-surface rounded-lg border border-hairline">
           <p className="text-[15px]">
             {lang === 'hi' ? 'इस फ़िल्टर में कोई चित्र उपलब्ध नहीं है।' : 'No pictures match the selected filter.'}

@@ -33,7 +33,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       case 'dark':
         variantStyles = disabled
           ? 'bg-hairline text-muted rounded-md px-[18px] py-[10px]'
-          : 'bg-ink-deep text-on-dark hover:bg-charcoal active:bg-ink rounded-md px-[18px] py-[10px]';
+          : 'bg-[#18181b] text-white hover:bg-charcoal active:bg-black dark:bg-primary dark:text-white dark:hover:bg-primary-pressed rounded-md px-[18px] py-[10px] shadow-sm';
         break;
 
       case 'secondary':

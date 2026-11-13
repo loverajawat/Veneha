@@ -110,17 +110,21 @@ export default function TopNavigation() {
     refreshData();
     setIsLoading(false);
 
-    const interval = setInterval(refreshData, 3000);
+    // Refresh on custom usage-updated event, storage, or focus (with a relaxed 30s background fallback)
+    const interval = setInterval(refreshData, 30000);
     const handleFocus = () => refreshData();
     const handleStorage = () => refreshData();
+    const handleUsageUpdated = () => refreshData();
 
     window.addEventListener('focus', handleFocus);
     window.addEventListener('storage', handleStorage);
+    window.addEventListener('usage-updated', handleUsageUpdated);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('usage-updated', handleUsageUpdated);
     };
   }, []);
 
@@ -255,8 +259,8 @@ export default function TopNavigation() {
                 href={link.href}
                 className={`h-[64px] inline-flex items-center px-2.5 xl:px-3.5 text-[14px] font-medium transition-colors border-b-2 -mb-[1px] select-none whitespace-nowrap ${
                   link.isActive
-                    ? 'text-ink border-ink font-semibold'
-                    : 'text-steel border-transparent hover:text-ink hover:border-hairline-strong'
+                    ? 'text-ink border-ink font-semibold dark:text-white dark:border-primary'
+                    : 'text-steel border-transparent hover:text-ink hover:border-hairline-strong dark:text-slate dark:hover:text-white'
                 }`}
               >
                 {lang === 'hi' ? link.labelHi : link.labelEn}
@@ -383,8 +387,8 @@ export default function TopNavigation() {
               onClick={() => setLang('en')}
               className={`px-3 py-1 text-[13px] font-semibold rounded-full transition-all cursor-pointer ${
                 lang === 'en'
-                  ? 'bg-ink-deep text-on-ink-deep shadow-sm'
-                  : 'text-steel hover:text-ink bg-transparent'
+                  ? 'bg-[#18181b] text-white shadow-sm dark:bg-primary dark:text-white'
+                  : 'text-steel hover:text-ink bg-transparent dark:text-slate dark:hover:text-white'
               }`}
               aria-label="English"
             >
@@ -395,8 +399,8 @@ export default function TopNavigation() {
               onClick={() => setLang('hi')}
               className={`px-3 py-1 text-[13px] font-semibold rounded-full transition-all cursor-pointer ${
                 lang === 'hi'
-                  ? 'bg-ink-deep text-on-ink-deep shadow-sm'
-                  : 'text-steel hover:text-ink bg-transparent'
+                  ? 'bg-[#18181b] text-white shadow-sm dark:bg-primary dark:text-white'
+                  : 'text-steel hover:text-ink bg-transparent dark:text-slate dark:hover:text-white'
               }`}
               aria-label="हिंदी"
             >
@@ -482,9 +486,9 @@ export default function TopNavigation() {
                       setShowProfileDropdown(false);
                       setShowGuestModal(true);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
                   >
-                    <Pencil className="w-4 h-4 text-steel" />
+                    <Pencil className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
                     <span>
                       {isUser
                         ? (lang === 'hi' ? siteConfig.auth.profileMenu.editName.hi : siteConfig.auth.profileMenu.editName.en)
@@ -496,9 +500,9 @@ export default function TopNavigation() {
                     <Link
                       href="/sign-in"
                       onClick={() => setShowProfileDropdown(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-primary hover:bg-surface rounded-md transition-colors cursor-pointer text-left font-medium"
+                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-primary hover:bg-surface rounded-md transition-colors cursor-pointer text-left font-medium group"
                     >
-                      <LogIn className="w-4 h-4 text-primary" />
+                      <LogIn className="w-4 h-4 text-primary group-hover:text-primary-pressed transition-colors" />
                       <span>
                         {lang === 'hi' ? siteConfig.auth.profileMenu.signInOrCreate.hi : siteConfig.auth.profileMenu.signInOrCreate.en}
                       </span>
@@ -508,9 +512,9 @@ export default function TopNavigation() {
                   <Link
                     href="/history"
                     onClick={() => setShowProfileDropdown(false)}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
                   >
-                    <History className="w-4 h-4 text-steel" />
+                    <History className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
                     <span>Past Attempts</span>
                   </Link>
 
@@ -520,18 +524,18 @@ export default function TopNavigation() {
                       setShowProfileDropdown(false);
                       setShowSettingsModal(true);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
                   >
-                    <Settings className="w-4 h-4 text-steel" />
+                    <Settings className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
                     <span>API Key Settings</span>
                   </button>
 
                   <Link
                     href="/privacy"
                     onClick={() => setShowProfileDropdown(false)}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
                   >
-                    <FileText className="w-4 h-4 text-steel" />
+                    <FileText className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
                     <span>Privacy Note</span>
                   </Link>
 

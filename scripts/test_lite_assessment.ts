@@ -30,8 +30,8 @@ async function testLiteAssessment() {
     console.log(`Success in ${Date.now() - start}ms!`);
     console.log('Overall score:', (res as any).scores?.overall ?? (res as any).final_assessment?.overall_score);
     console.log('Verdict:', (res as any).suitability?.verdict ?? (res as any).ppdt_suitability?.verdict);
-  } catch (err) {
-    console.error(`Failed after ${Date.now() - start}ms:`, err.message);
+  } catch (err: any) {
+    console.error(`Failed after ${Date.now() - start}ms:`, err?.message || err);
   }
 }
 

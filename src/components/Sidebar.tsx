@@ -91,18 +91,26 @@ export default function Sidebar() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   useEffect(() => {
-    setGuest(getGuest());
-    setDailyUsage(getDailyUsage());
-    setWatUsage(getWatDailyUsage());
-    setAttemptCount(getStoredAttempts().length + getWatAttempts().length);
-
-    const interval = setInterval(() => {
+    const refresh = () => {
+      setGuest(getGuest());
       setDailyUsage(getDailyUsage());
       setWatUsage(getWatDailyUsage());
       setAttemptCount(getStoredAttempts().length + getWatAttempts().length);
-      setGuest(getGuest());
-    }, 3000);
-    return () => clearInterval(interval);
+    };
+
+    refresh();
+
+    window.addEventListener('attempts-updated', refresh);
+    window.addEventListener('storage', refresh);
+    window.addEventListener('usage-updated', refresh);
+
+    const interval = setInterval(refresh, 3000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('attempts-updated', refresh);
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('usage-updated', refresh);
+    };
   }, []);
 
   return (

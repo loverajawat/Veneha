@@ -16,11 +16,17 @@ export interface EvaluateOptions {
   customKey?: string | null;
 }
 
+const stimulusImageCache = new Map<string, { base64: string; mimeType: string }>();
+
 /**
  * Loads the stimulus picture server-side by pictureId from public/pictures.
  * Never trusts image bytes or URLs sent directly from the client.
  */
 export function loadServerStimulusImage(pictureId: string): { base64: string; mimeType: string } | null {
+  if (stimulusImageCache.has(pictureId)) {
+    return stimulusImageCache.get(pictureId)!;
+  }
+
   const picturesDir = path.join(process.cwd(), 'public', 'pictures');
   if (!fs.existsSync(picturesDir)) return null;
 
@@ -31,10 +37,12 @@ export function loadServerStimulusImage(pictureId: string): { base64: string; mi
     const fullPath = path.join(picturesDir, `${pictureId}${ext}`);
     if (fs.existsSync(fullPath)) {
       const buf = fs.readFileSync(fullPath);
-      return {
+      const res = {
         base64: buf.toString('base64'),
         mimeType: ext === '.png' ? 'image/png' : 'image/jpeg',
       };
+      stimulusImageCache.set(pictureId, res);
+      return res;
     }
   }
 
@@ -46,23 +54,27 @@ export function loadServerStimulusImage(pictureId: string): { base64: string; mi
       const stimulusPath = path.join(picturesDir, `ppdt_stimulus_${num}${ext}`);
       if (fs.existsSync(stimulusPath)) {
         const buf = fs.readFileSync(stimulusPath);
-        return {
+        const res = {
           base64: buf.toString('base64'),
           mimeType: ext === '.png' ? 'image/png' : 'image/jpeg',
         };
+        stimulusImageCache.set(pictureId, res);
+        return res;
       }
     }
   }
 
-  // 2. Fallback to picture_01 or first available
+  // 3. Fallback to picture_01 or first available
   const files = fs.readdirSync(picturesDir).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
   if (files.length > 0) {
     const fallbackPath = path.join(picturesDir, files[0]);
     const buf = fs.readFileSync(fallbackPath);
-    return {
+    const res = {
       base64: buf.toString('base64'),
       mimeType: fallbackPath.endsWith('.png') ? 'image/png' : 'image/jpeg',
     };
+    stimulusImageCache.set(pictureId, res);
+    return res;
   }
 
   return null;

@@ -108,7 +108,7 @@ export default function GuidePage() {
                 onClick={() => setActiveStageId(section.id)}
               >
                 <span>{section.day}</span>
-                <span className="text-steel font-normal ml-1 hidden sm:inline">
+                <span className="text-steel dark:text-slate font-normal ml-1 hidden sm:inline">
                   · {lang === 'en' ? section.titleEn.split(':')[0] : section.titleHi.split(':')[0]}
                 </span>
               </PillTab>

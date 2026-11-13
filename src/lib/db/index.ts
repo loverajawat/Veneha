@@ -2,11 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-let dbInstance: Database.Database | null = null;
+declare global {
+  // eslint-disable-next-line no-var
+  var __venehaDb: Database.Database | undefined;
+}
 
 export function getDb(): Database.Database {
-  if (dbInstance) {
-    return dbInstance;
+  if (globalThis.__venehaDb) {
+    return globalThis.__venehaDb;
   }
 
   const dataDir = path.join(process.cwd(), 'data');
@@ -15,12 +18,13 @@ export function getDb(): Database.Database {
   }
 
   const dbPath = path.join(dataDir, 'veneha.db');
-  dbInstance = new Database(dbPath);
-  dbInstance.pragma('journal_mode = WAL');
-  dbInstance.pragma('foreign_keys = ON');
+  const db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
 
-  initSchema(dbInstance);
-  return dbInstance;
+  initSchema(db);
+  globalThis.__venehaDb = db;
+  return db;
 }
 
 function initSchema(db: Database.Database) {

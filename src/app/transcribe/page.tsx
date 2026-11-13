@@ -347,8 +347,8 @@ export default function TranscribePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left Column: Original Paper Photos (5 cols on lg) */}
-        {pages.length > 0 && (showMobilePhotos || (typeof window !== 'undefined' && window.innerWidth >= 1024)) && (
-          <div className="lg:col-span-5 flex flex-col space-y-3 lg:sticky lg:top-4">
+        {pages.length > 0 && (
+          <div className={`lg:col-span-5 flex-col space-y-3 lg:sticky lg:top-4 ${showMobilePhotos ? 'flex' : 'hidden lg:flex'}`}>
             <div className="flex items-center justify-between pb-1">
               <span className="text-xs font-semibold text-charcoal flex items-center gap-1.5">
                 <Eye className="w-4 h-4 text-primary" />

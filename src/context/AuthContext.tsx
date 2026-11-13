@@ -84,6 +84,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // Read local guest immediately on client mount (post-hydration) for zero-latency UI
+    const local = getGuest();
+    if (local) {
+      setGuest({ id: local.id, name: local.name });
+      setIsLoading(false);
+    }
     checkSession();
   }, [checkSession]);
 

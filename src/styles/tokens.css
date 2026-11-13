@@ -92,6 +92,18 @@
   /* Font stack */
   --font-stack: "Notion Sans", Inter, -apple-system, system-ui, "Segoe UI", "Noto Sans Devanagari", Helvetica, sans-serif;
   --font-hindi-stack: "Noto Sans Devanagari", "Notion Sans", Inter, sans-serif;
+
+  /* Interactive Tabs & Filter Controls (Light Mode) */
+  --tab-bg-unselected: #ffffff;
+  --tab-text-unselected: #5d5b54;
+  --tab-border-unselected: #e5e3df;
+  --tab-hover-unselected: #f6f5f4;
+  --tab-hover-text-unselected: #1a1a1a;
+  --tab-bg-selected: #18181b;
+  --tab-text-selected: #ffffff;
+  --tab-border-selected: #18181b;
+  --tab-icon-unselected: #5d5b54;
+  --tab-icon-selected: #ffffff;
 }
 
 /* ==========================================================================
@@ -115,6 +127,22 @@
   --color-steel: #64748b;
   --color-stone: #475569;
   --color-muted: #334155;
+
+  /* Interactive Tabs & Filter Controls (Dark Mode) */
+  --tab-bg-unselected: #151c28;
+  --tab-text-unselected: #94a3b8;
+  --tab-border-unselected: #222c3d;
+  --tab-hover-unselected: #1e293b;
+  --tab-hover-text-unselected: #f8fafc;
+  --tab-bg-selected: #5645d4;
+  --tab-text-selected: #ffffff;
+  --tab-border-selected: #5645d4;
+  --tab-icon-unselected: #94a3b8;
+  --tab-icon-selected: #ffffff;
+
+  /* Brand Accents for Dark Mode Contrast */
+  --color-brand-purple-800: #d6b6f6;
+  --color-brand-orange-deep: #ffaa66;
 
   /* Card Tints in dark mode */
   --color-card-tint-peach: #291a14;

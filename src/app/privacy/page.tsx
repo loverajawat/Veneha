@@ -26,7 +26,9 @@ export default function PrivacyPage() {
             type="button"
             onClick={() => setLang('en')}
             className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-              lang === 'en' ? 'bg-ink-deep text-white shadow-xs' : 'text-steel hover:text-ink'
+              lang === 'en'
+                ? 'bg-[#18181b] text-white shadow-xs dark:bg-primary dark:text-white'
+                : 'text-steel hover:text-ink dark:text-slate dark:hover:text-white'
             }`}
           >
             EN
@@ -35,7 +37,9 @@ export default function PrivacyPage() {
             type="button"
             onClick={() => setLang('hi')}
             className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${
-              lang === 'hi' ? 'bg-ink-deep text-white shadow-xs' : 'text-steel hover:text-ink'
+              lang === 'hi'
+                ? 'bg-[#18181b] text-white shadow-xs dark:bg-primary dark:text-white'
+                : 'text-steel hover:text-ink dark:text-slate dark:hover:text-white'
             }`}
           >
             हिं

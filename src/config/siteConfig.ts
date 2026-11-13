@@ -173,6 +173,10 @@ export const siteConfig = {
       en: 'Attempted',
       hi: 'प्रयास किया',
     },
+    scoreChart: {
+      en: 'Score Chart',
+      hi: 'स्कोर चार्ट',
+    },
     all: {
       en: 'All',
       hi: 'सभी',
@@ -256,6 +260,10 @@ export const siteConfig = {
     attempted: {
       en: 'Attempted',
       hi: 'प्रयास किया',
+    },
+    scoreChart: {
+      en: 'Score Chart',
+      hi: 'स्कोर चार्ट',
     },
     all: {
       en: 'All',

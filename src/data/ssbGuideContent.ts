@@ -34,7 +34,7 @@ export interface OLQItem {
 export const SSB_GUIDE_DATA: GuideSection[] = [
   {
     id: "stage-1-screening",
-    day: "Day 1 / स्टेज 1",
+    day: "Day 1",
     titleEn: "Stage 1: Screening Test (OIR & PPDT)",
     titleHi: "स्टेज 1: स्क्रीनिंग टेस्ट (OIR और PPDT)",
     tagEn: "Crucial Filter (~60% Screened Out)",
@@ -70,7 +70,7 @@ export const SSB_GUIDE_DATA: GuideSection[] = [
   },
   {
     id: "stage-2-psychology",
-    day: "Day 2 / स्टेज 2",
+    day: "Day 2",
     titleEn: "Stage 2: Psychology Battery (TAT, WAT, SRT, SDT)",
     titleHi: "स्टेज 2: मनोविज्ञान परीक्षण (TAT, WAT, SRT, SDT)",
     tagEn: "Window to Subconscious Mind",
@@ -114,7 +114,7 @@ export const SSB_GUIDE_DATA: GuideSection[] = [
   },
   {
     id: "stage-3-gto",
-    day: "Day 3 & 4 / स्टेज 3 और 4",
+    day: "Day 3 & 4",
     titleEn: "Stage 3 & 4: Group Testing Officer (GTO) Grounds",
     titleHi: "स्टेज 3 और 4: जीटीओ (GTO) ग्राउंड टास्क",
     tagEn: "Outdoor Leadership & Team Synergy",
@@ -150,7 +150,7 @@ export const SSB_GUIDE_DATA: GuideSection[] = [
   },
   {
     id: "stage-4-interview",
-    day: "Day 4 / स्टेज 4",
+    day: "Day 4",
     titleEn: "Personal Interview: The IO Interaction",
     titleHi: "व्यक्तिगत साक्षात्कार: इंटरव्यू ऑफिसर (IO)",
     tagEn: "Comprehensive Information Questionnaire (PIQ)",
@@ -170,7 +170,7 @@ export const SSB_GUIDE_DATA: GuideSection[] = [
   },
   {
     id: "stage-5-conference",
-    day: "Day 5 / स्टेज 5",
+    day: "Day 5",
     titleEn: "Stage 5: Final Board Conference & Results",
     titleHi: "स्टेज 5: फाइनल बोर्ड कॉन्फ्रेंस और परिणाम",
     tagEn: "The Final Recommendation",

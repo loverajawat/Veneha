@@ -26,8 +26,8 @@ async function testAssessment() {
     console.log('Overall score:', (res as any).scores?.overall ?? (res as any).final_assessment?.overall_score);
     console.log('Verdict:', (res as any).suitability?.verdict ?? (res as any).ppdt_suitability?.verdict);
     console.log('Picture perception summary:', (res as any).picture_perception?.details_identified?.substring(0, 100));
-  } catch (err) {
-    console.error(`\n❌ Failed after ${Date.now() - start}ms:`, err.message);
+  } catch (err: any) {
+    console.error(`\n❌ Failed after ${Date.now() - start}ms:`, err?.message || err);
   }
 }
 

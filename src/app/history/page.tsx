@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -13,14 +13,15 @@ import {
   Sparkles
 } from 'lucide-react';
 import { getStoredAttempts, clearAttempts, StoredAttempt } from '@/lib/guestStorage';
-import { Button, TagChip, CardBase } from '@/components/ui';
+import { Button, TagChip, CardBase, PillTab } from '@/components/ui';
 
 export default function HistoryPage() {
   const router = useRouter();
   const [attempts, setAttempts] = useState<StoredAttempt[]>([]);
+  const [filter, setFilter] = useState<'all' | 'Strong' | 'Average' | 'Weak'>('all');
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
+  const loadHistory = () => {
     const local = getStoredAttempts();
     setAttempts(local);
     setLoaded(true);
@@ -28,11 +29,29 @@ export default function HistoryPage() {
     fetch('/api/attempts')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data && data.attempts && Array.isArray(data.attempts) && data.attempts.length > 0) {
-          setAttempts(data.attempts);
+        if (data && data.attempts && Array.isArray(data.attempts)) {
+          if (data.attempts.length > 0) {
+            setAttempts(data.attempts);
+          } else if (local.length === 0) {
+            setAttempts([]);
+          }
         }
       })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadHistory();
+
+    window.addEventListener('attempts-updated', loadHistory);
+    window.addEventListener('storage', loadHistory);
+    window.addEventListener('focus', loadHistory);
+
+    return () => {
+      window.removeEventListener('attempts-updated', loadHistory);
+      window.removeEventListener('storage', loadHistory);
+      window.removeEventListener('focus', loadHistory);
+    };
   }, []);
 
   const handleOpenAttempt = (attempt: StoredAttempt) => {
@@ -106,8 +125,36 @@ export default function HistoryPage() {
           </div>
         </div>
       ) : (
-        <div className="space-y-3">
-          {attempts.map((attempt) => {
+        <div className="space-y-4">
+          {/* Verdict Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1" role="tablist">
+            <PillTab active={filter === 'all'} onClick={() => setFilter('all')}>
+              All ({attempts.length})
+            </PillTab>
+            {attempts.some(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Strong') && (
+              <PillTab active={filter === 'Strong'} onClick={() => setFilter('Strong')}>
+                Strong ({attempts.filter(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Strong').length})
+              </PillTab>
+            )}
+            {attempts.some(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Average') && (
+              <PillTab active={filter === 'Average'} onClick={() => setFilter('Average')}>
+                Average ({attempts.filter(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Average').length})
+              </PillTab>
+            )}
+            {attempts.some(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Weak') && (
+              <PillTab active={filter === 'Weak'} onClick={() => setFilter('Weak')}>
+                Weak ({attempts.filter(a => (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === 'Weak').length})
+              </PillTab>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {attempts
+              .filter((a) => {
+                if (filter === 'all') return true;
+                return (a.ppdt_verdict || a.feedback?.ppdt_suitability?.verdict) === filter;
+              })
+              .map((attempt) => {
             const dateObj = new Date(attempt.date);
             const dateStr = dateObj.toLocaleDateString(undefined, {
               month: 'short',
@@ -174,6 +221,7 @@ export default function HistoryPage() {
               </div>
             );
           })}
+          </div>
         </div>
       )}
     </div>
