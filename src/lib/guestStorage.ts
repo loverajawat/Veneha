@@ -189,9 +189,21 @@ export function getPictureGridData(customAttempts?: StoredAttempt[]): PictureGri
   const activePictures = getActivePictures();
   const attempts = customAttempts ?? getStoredAttempts();
 
+  // Single-pass O(N) grouping
+  const attemptsByPicture = new Map<string, StoredAttempt[]>();
+  for (let i = 0; i < attempts.length; i++) {
+    const a = attempts[i];
+    const existing = attemptsByPicture.get(a.pictureId);
+    if (existing) {
+      existing.push(a);
+    } else {
+      attemptsByPicture.set(a.pictureId, [a]);
+    }
+  }
+
   return activePictures.map((pic, idx) => {
     const picNum = idx + 1;
-    const picAttempts = attempts.filter(a => a.pictureId === pic.id);
+    const picAttempts = attemptsByPicture.get(pic.id) || [];
     const attempted = picAttempts.length > 0;
     const lastAttempt = attempted ? picAttempts[0] : null;
 

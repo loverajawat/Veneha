@@ -10,12 +10,16 @@ const nextConfig = {
   outputFileTracingRoot: __dirname,
   serverExternalPackages: ['better-sqlite3'],
   compress: true,
+  poweredByHeader: false,
+  httpAgentOptions: {
+    keepAlive: true,
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days cache for static stimulus pictures
   },
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: ['lucide-react', 'bcryptjs', 'jose'],
     serverActions: {
       bodySizeLimit: '10mb',
     },

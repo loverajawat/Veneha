@@ -28,7 +28,7 @@ export interface WatAttempt {
   createdAt: string;
   overallScore: number | null;
   summaryJson: WatSummaryJson | null;
-  status: 'transcribed' | 'assessed' | 'failed';
+  status: 'transcribed' | 'assessed' | 'failed' | 'completed';
   responses: WatResponseItem[];
 }
 
@@ -145,12 +145,39 @@ export interface WatGridItem {
   attemptCount: number;
 }
 
+export function recordWatSetCompletion(setId: number): WatAttempt {
+  const attempt = saveWatAttempt({
+    guestId: 'cadet',
+    setId,
+    overallScore: null,
+    summaryJson: null,
+    status: 'completed',
+    responses: [],
+  });
+  incrementWatDailyUsage();
+  return attempt;
+}
+
 export function getWatGridData(): WatGridItem[] {
   const sets = getAllWatSets();
   const attempts = getWatAttempts();
 
+  // Single-pass O(N) grouping
+  const attemptsBySet = new Map<number, WatAttempt[]>();
+  for (let i = 0; i < attempts.length; i++) {
+    const a = attempts[i];
+    if (a.status === 'assessed' || a.status === 'completed') {
+      const existing = attemptsBySet.get(a.setId);
+      if (existing) {
+        existing.push(a);
+      } else {
+        attemptsBySet.set(a.setId, [a]);
+      }
+    }
+  }
+
   return sets.map((s) => {
-    const setAttempts = attempts.filter((a) => a.setId === s.setNumber && a.status === 'assessed');
+    const setAttempts = attemptsBySet.get(s.setNumber) || [];
     const attempted = setAttempts.length > 0;
 
     let lastScore: string | null = null;
@@ -165,7 +192,7 @@ export function getWatGridData(): WatGridItem[] {
       } else if (latest.summaryJson?.overall_score) {
         lastScore = `${latest.summaryJson.overall_score}/10`;
       } else {
-        lastScore = 'Attempted';
+        lastScore = 'Completed';
       }
 
       if (latest.createdAt) {

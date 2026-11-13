@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Dices, AlertTriangle, ExternalLink, HelpCircle, LineChart } from 'lucide-react';
+import { Dices, AlertTriangle, ExternalLink, HelpCircle, LineChart, Play } from 'lucide-react';
 import { 
   getPictureGridData, 
   PictureGridItem, 
@@ -284,25 +284,41 @@ export default function PracticeGridPage() {
             return (
               <div
                 key={item.pictureId}
-                className={`group relative flex flex-col justify-between rounded-lg border border-hairline hover:shadow-level1 transition-all duration-150 overflow-hidden min-h-[140px] ${tintClass}`}
+                className={`group flex flex-col justify-between rounded-lg border border-hairline hover:border-hairline-strong hover:shadow-level2 transition-all overflow-hidden min-h-[140px] cursor-pointer text-left select-none ${tintClass}`}
               >
                 {/* Main clickable area for the picture */}
                 <Link
                   href={blockHref}
-                  className="flex-1 flex flex-col items-center justify-center p-5 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-t-lg min-h-[90px]"
+                  className="p-4 sm:p-4.5 flex-1 flex flex-col justify-between focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-t-lg text-left"
                   aria-label={accessibleName}
                 >
-                  <span className="font-semibold text-[20px] text-charcoal group-hover:text-ink transition-colors">
-                    {pictureLabel}
-                  </span>
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-[20px] text-charcoal group-hover:text-ink transition-colors">
+                        {pictureLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 flex items-center justify-between gap-2 min-h-[26px]">
+                    <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-semibold text-primary whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <Play className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current shrink-0" />
+                      <span>Start Practice &rarr;</span>
+                    </span>
+                    {item.attempted && (
+                      <TagChip color="green" className="shrink-0 whitespace-nowrap">
+                        Attempted
+                      </TagChip>
+                    )}
+                  </div>
                 </Link>
 
                 {/* Bottom Bar: ONLY for Attempted pictures (attached with hairline top border) */}
                 {item.attempted && (
-                  <div className="shrink-0 bg-canvas border-t border-hairline px-3 py-2 text-[12px] text-charcoal">
+                  <div className="shrink-0 bg-canvas border-t border-hairline px-3.5 py-2 text-[12px] text-charcoal">
                     <div className="flex items-center justify-between gap-1">
                       {/* Left: Score as tag chip */}
-                      <div className="flex items-center gap-1 font-semibold">
+                      <div className="flex items-center gap-1.5 font-semibold">
                         <span className="text-slate font-normal">Score:</span>
                         <TagChip color="purple">{item.lastScore}</TagChip>
                       </div>
