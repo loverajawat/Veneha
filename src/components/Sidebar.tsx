@@ -258,8 +258,8 @@ export default function Sidebar() {
           {/* Footer: Privacy Note on its own line (Item E) */}
           <div className="flex items-center gap-1.5 px-1 pt-1 text-[12px] text-[#a8baa3]">
             <Lock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="truncate" title={lang === 'hi' ? 'आपकी तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं' : 'Photos not saved by Veneha'}>
-              {lang === 'hi' ? 'वेनेहा द्वारा फ़ोटो सहेजे नहीं जाते' : 'Photos not saved by Veneha'}
+            <span className="truncate" title={lang === 'hi' ? 'आपकी हस्तलिखित तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं' : 'Handwriting photos are not saved by Veneha'}>
+              {lang === 'hi' ? 'हस्तलिखित फ़ोटो सहेजे नहीं जाते' : 'Handwriting photos are not saved by Veneha'}
             </span>
           </div>
 

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx tests/no-fake-data.test.ts && tsx tests/auth-isolation.test.ts && tsx tests/validator-strictness.test.ts",
+    "test": "tsx tests/no-fake-data.test.ts && tsx tests/auth-isolation.test.ts && tsx tests/validator-strictness.test.ts && tsx tests/profile.test.ts",
     "eval:transcribe": "tsx eval/transcription/run.ts",
     "eval:assess": "tsx eval/assessment/run.ts"
   },
@@ -19,7 +19,8 @@
     "lucide-react": "^1.16.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

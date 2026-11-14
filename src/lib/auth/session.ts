@@ -72,6 +72,12 @@ export async function getAuthOwner(req?: NextRequest): Promise<AuthOwner> {
         | undefined;
 
       if (user) {
+        const profile = db
+          .prepare('SELECT target_exam, target_exam_other, avatar_filename, avatar_version FROM profiles WHERE user_id = ?')
+          .get(user.id) as
+          | { target_exam?: string | null; target_exam_other?: string | null; avatar_filename?: string | null; avatar_version?: number }
+          | undefined;
+
         return {
           type: 'user',
           userId: user.id,
@@ -80,6 +86,10 @@ export async function getAuthOwner(req?: NextRequest): Promise<AuthOwner> {
             email: user.email,
             displayName: user.display_name,
             createdAt: user.created_at,
+            targetExam: profile?.target_exam || null,
+            targetExamOther: profile?.target_exam_other || null,
+            avatarVersion: profile?.avatar_version || 0,
+            hasPhoto: Boolean(profile?.avatar_filename),
           },
         };
       }

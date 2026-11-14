@@ -38,11 +38,12 @@ next-env.d.ts
 # scratch files
 /scratch
 
-# database
+# database & uploads
 /data/*.db
 /data/*.db-journal
 /data/*.db-wal
 /data/*.db-shm
+/data/avatars/
 *.db
 
 # credentials & service accounts

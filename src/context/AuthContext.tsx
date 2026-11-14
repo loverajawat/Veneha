@@ -14,6 +14,8 @@ interface AuthContextType {
   isGuest: boolean;
   isLoading: boolean;
   allowGuestMode: boolean;
+  refreshSession: () => Promise<void>;
+  updateUserOptimistic: (patch: Partial<UserProfile>) => void;
   // Actions
   signIn: (email: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signUp: (name: string, email: string, pass: string, ageConfirmed18Plus: boolean) => Promise<{ success: boolean; error?: string }>;
@@ -91,7 +93,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
     checkSession();
+
+    const handleProfileUpdate = () => {
+      checkSession();
+    };
+
+    window.addEventListener('profile-updated', handleProfileUpdate);
+    return () => {
+      window.removeEventListener('profile-updated', handleProfileUpdate);
+    };
   }, [checkSession]);
+
+  const updateUserOptimistic = useCallback((patch: Partial<UserProfile>) => {
+    setUser((prev) => (prev ? { ...prev, ...patch } : null));
+  }, []);
 
   const checkForGuestHistoryClaim = (currentGuestId?: string) => {
     const localGuest = getGuest();
@@ -259,6 +274,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isGuest,
         isLoading,
         allowGuestMode,
+        refreshSession: checkSession,
+        updateUserOptimistic,
         signIn,
         signUp,
         signOut,

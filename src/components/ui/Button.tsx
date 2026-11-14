@@ -7,7 +7,8 @@ export type ButtonVariant =
   | 'on-dark'
   | 'secondary-on-dark'
   | 'ghost'
-  | 'link';
+  | 'link'
+  | 'danger';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -58,6 +59,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         variantStyles = disabled
           ? 'bg-transparent text-muted rounded-sm px-[12px] py-[8px]'
           : 'bg-transparent text-ink hover:bg-surface active:bg-surface-soft rounded-sm px-[12px] py-[8px]';
+        break;
+
+      case 'danger':
+        variantStyles = disabled
+          ? 'bg-hairline text-muted rounded-md px-[18px] py-[10px]'
+          : 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 rounded-md px-[18px] py-[10px] shadow-sm';
         break;
 
       case 'link':

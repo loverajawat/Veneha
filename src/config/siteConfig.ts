@@ -225,6 +225,10 @@ export const siteConfig = {
       en: 'View feedback',
       hi: 'फीडबैक देखें',
     },
+    moreComingSoon: {
+      en: 'More is coming soon',
+      hi: 'जल्द ही और आ रहा है',
+    },
   },
 
 
@@ -276,6 +280,10 @@ export const siteConfig = {
     viewFeedback: {
       en: 'View feedback',
       hi: 'फीडबैक देखें',
+    },
+    moreComingSoon: {
+      en: 'More is coming soon',
+      hi: 'जल्द ही और आ रहा है',
     },
   },
 

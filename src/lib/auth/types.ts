@@ -13,6 +13,10 @@ export interface UserProfile {
   email: string;
   displayName: string;
   createdAt: string;
+  targetExam?: string | null;
+  targetExamOther?: string | null;
+  avatarVersion?: number;
+  hasPhoto?: boolean;
 }
 
 export interface SessionPayload {

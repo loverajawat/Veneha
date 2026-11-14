@@ -125,5 +125,29 @@ function initSchema(db: Database.Database) {
       last_attempt_at INTEGER NOT NULL
     );
   `);
+
+  // 6. User Profiles table (one-to-one with users)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS profiles (
+      user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+      date_of_birth TEXT,
+      address_line1 TEXT,
+      address_line2 TEXT,
+      city TEXT,
+      state TEXT,
+      pin_code TEXT,
+      mobile_e164 TEXT,
+      target_exam TEXT,
+      target_exam_other TEXT,
+      education_status TEXT,
+      ssb_attempts TEXT,
+      preferred_language TEXT,
+      avatar_filename TEXT,
+      avatar_version INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_profiles_user ON profiles(user_id);
+  `);
 }
 

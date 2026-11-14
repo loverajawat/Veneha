@@ -25,7 +25,7 @@ function WatGridContent() {
   const searchParams = useSearchParams();
   const { lang } = useLanguage();
 
-  const [items, setItems] = useState<WatGridItem[]>([]);
+  const [items, setItems] = useState<WatGridItem[]>(() => getWatGridData());
   const [activeFilter, setActiveFilter] = useState<'all' | 'not-attempted' | 'attempted'>('all');
   const [canAttempt, setCanAttempt] = useState(true);
   const [selectedSetNumber, setSelectedSetNumber] = useState<number | null>(null);
@@ -235,6 +235,15 @@ function WatGridContent() {
             );
           })}
         </div>
+
+        {/* Subtle "More is coming soon" message below the practice grid */}
+        {filteredItems.length > 0 && (
+          <div className="pt-4 sm:pt-6 pb-2 text-center">
+            <p className="text-[13px] sm:text-[14px] font-medium text-steel dark:text-slate">
+              {lang === 'hi' ? t.moreComingSoon.hi : t.moreComingSoon.en}
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

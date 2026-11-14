@@ -180,7 +180,7 @@ export default function Footer() {
               >
                 <li className="flex items-center gap-1.5 text-slate text-[13px]">
                   <Lock className="w-3.5 h-3.5 text-semantic-success shrink-0" />
-                  <span>Photos not saved by Veneha</span>
+                  <span>Handwriting photos are not saved by Veneha</span>
                 </li>
                 <li>
                   <Link href="/privacy" className="hover:text-ink transition-colors text-[13px] text-slate underline">

@@ -84,6 +84,12 @@ export default function PrivacyPage() {
                 : 'Your full name, email address, and a securely salted bcrypt password hash. We never see, store, or log plain passwords.'}
             </li>
             <li>
+              <strong className="text-ink">{lang === 'hi' ? 'वैकल्पिक प्रोफ़ाइल विवरण:' : 'Optional Profile Details:'}</strong>{' '}
+              {lang === 'hi'
+                ? 'यदि आप जोड़ना चुनते हैं, तो हम आपके अभ्यास अनुभव को वैयक्तिकृत करने के लिए आपकी जन्म तिथि, फोन नंबर, पता, लक्षित परीक्षा, शैक्षणिक स्थिति और पिछले एसएसबी प्रयासों को सहेजते हैं। ये फ़ील्ड पूरी तरह से वैकल्पिक हैं और इन्हें किसी भी समय संपादित या हटाया जा सकता है।'
+                : 'If you choose to add them, we store your date of birth, phone number, address, target exam, education status, and previous SSB attempts to personalize your practice experience. These fields are entirely optional and can be edited or deleted at any time.'}
+            </li>
+            <li>
               <strong className="text-ink">{lang === 'hi' ? 'अभ्यास परिणाम:' : 'Practice Results:'}</strong>{' '}
               {lang === 'hi'
                 ? 'आपके द्वारा स्वीकृत कहानी ट्रांसक्रिप्ट, स्कोर, फीडबैक और अभ्यास की तारीख।'
@@ -92,28 +98,40 @@ export default function PrivacyPage() {
             <li>
               <strong className="text-ink">{lang === 'hi' ? 'क्या हम एकत्र नहीं करते:' : 'What We Never Collect:'}</strong>{' '}
               {lang === 'hi'
-                ? 'कोई जन्म तिथि नहीं, कोई फोन नंबर नहीं, कोई वित्तीय डेटा नहीं।'
-                : 'No date of birth, no phone numbers, no address, and no payment details.'}
+                ? 'कोई वित्तीय या भुगतान विवरण नहीं, कोई पृष्ठभूमि ट्रैकिंग नहीं, और कोई तीसरे पक्ष के विज्ञापन ट्रैकर नहीं।'
+                : 'No financial or payment data, no background tracking, and no third-party advertising trackers.'}
             </li>
           </ul>
         </CardBase>
 
-        {/* 2. Photos & Google Gemini */}
-        <CardBase className="p-6 space-y-3 border-emerald-200/60 bg-card-tint-mint/20">
+        {/* 2. Photos & Privacy */}
+        <CardBase className="p-6 space-y-4 border-emerald-200/60 bg-card-tint-mint/20">
           <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
             <Lock className="w-5 h-5 text-emerald-600" />
-            <span>{lang === 'hi' ? 'हस्तलिखित तस्वीरें और AI मूल्यांकन' : 'Handwritten Photos & AI Assessment'}</span>
+            <span>{lang === 'hi' ? 'तस्वीरें एवं गोपनीयता' : 'Photos & Image Privacy'}</span>
           </h2>
-          <p className="font-medium text-ink">
-            {lang === 'hi'
-              ? 'आपकी तस्वीरें वेनेहा द्वारा सहेजी नहीं जाती हैं।'
-              : 'Your photos are not saved by Veneha.'}
-          </p>
-          <p className="text-slate">
-            {lang === 'hi'
-              ? "आपकी तस्वीरें, आपकी कहानी और अभ्यास चित्र केवल हस्तलेखन पढ़ने और ऑफिसर लाइक क्वालिटीज (OLQs) का निष्पक्ष मूल्यांकन करने के लिए Google की Gemini सेवा को भेजे जाते हैं। ट्रांसक्रिप्शन के तुरंत बाद तस्वीरें स्मृति से हटा दी जाती हैं।"
-              : "Your photos, your story, and the practice picture are sent to Google's Gemini service to read and evaluate them under exam standards. Images are processed in memory and deleted immediately after transcription."}
-          </p>
+          <div className="space-y-3 text-slate">
+            <div>
+              <p className="font-medium text-ink">
+                {lang === 'hi' ? 'हस्तलिखित कहानियां:' : 'Handwritten story photos:'}
+              </p>
+              <p className="text-sm mt-0.5">
+                {lang === 'hi'
+                  ? 'हस्तलिखित कहानियों की तस्वीरें कभी भी वेनेहा द्वारा डिस्क या स्थायी मेमोरी में सहेजी नहीं जाती हैं। वे केवल OCR ट्रांसक्रिप्शन और OLQ मूल्यांकन के लिए मेमोरी में संसाधित की जाती हैं और तुरंत हटा दी जाती हैं।'
+                  : 'Handwriting photos submitted for OCR evaluation are processed strictly in memory and are never saved to disk or permanent storage. They are deleted immediately following transcription.'}
+              </p>
+            </div>
+            <div>
+              <p className="font-medium text-ink">
+                {lang === 'hi' ? 'प्रोफ़ाइल फ़ोटो (अवतार):' : 'Profile photos:'}
+              </p>
+              <p className="text-sm mt-0.5">
+                {lang === 'hi'
+                  ? 'यदि आप प्रोफ़ाइल फ़ोटो अपलोड करना चुनते हैं, तो इसे केवल आपके अवतार को प्रदर्शित करने के लिए हमारे सुरक्षित सर्वर पर निजी तौर पर संग्रहीत किया जाता है। इसका उपयोग कभी भी AI प्रशिक्षण, सार्वजनिक निर्देशिकाओं या तीसरे पक्ष के साथ साझा करने के लिए नहीं किया जाता है। आप इसे अपनी प्रोफ़ाइल से किसी भी समय हटा सकते हैं।'
+                  : 'If you upload a profile photo, it is stored privately on our secure server solely to display your avatar. It is never used for AI training, public directories, or third-party sharing. You can remove it at any time directly from your profile settings.'}
+              </p>
+            </div>
+          </div>
         </CardBase>
 
         {/* 3. 18+ Age Requirement & Guest Mode */}
@@ -137,8 +155,8 @@ export default function PrivacyPage() {
           </h2>
           <p className="text-slate">
             {lang === 'hi'
-              ? 'आप किसी भी समय अपने खाते और संबंधित सभी अभ्यास डेटा को पूर्ण रूप से हटाने का अनुरोध कर सकते हैं। इसके लिए आप अपने पंजीकृत ईमेल से privacy@veneha.com पर संपर्क कर सकते हैं या प्रोफाइल मेनू से अपना डेटा मिटा सकते हैं।'
-              : 'You have full control over your data. To request permanent deletion of your account, attempts, and associated records, contact privacy@veneha.com from your registered email address or use the Clear History option in Past Attempts.'}
+              ? 'आप किसी भी समय अपने खाते और संबंधित सभी अभ्यास डेटा को पूर्ण रूप से हटाने का अनुरोध कर सकते हैं। आप अपने प्रोफ़ाइल पृष्ठ (/profile) से एक क्लिक में अपना संपूर्ण डेटा निर्यात (JSON) कर सकते हैं या अपना खाता और फ़ोटो स्थायी रूप से हटा सकते हैं, अथवा privacy@veneha.com पर संपर्क कर सकते हैं।'
+              : 'You have full control over your data. You can download an export of your complete profile and practice history (JSON) at any time, or permanently delete your account, avatar, and all records directly from your Profile settings (/profile), or by contacting privacy@veneha.com.'}
           </p>
         </CardBase>
       </div>

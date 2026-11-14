@@ -25,6 +25,8 @@ import { getWatDailyUsage, WatDailyUsage, WAT_DAILY_LIMIT } from '@/lib/watStora
 import { useLanguage } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
 import { siteConfig } from '@/config/siteConfig';
+import Avatar from '@/components/ui/Avatar';
+import { formatTargetExamDisplay } from '@/data/targetExams';
 import GuestModal from './GuestModal';
 import SettingsModal from './SettingsModal';
 
@@ -410,159 +412,202 @@ export default function TopNavigation() {
 
           {/* Profile Menu Dropdown */}
           <div className="relative" ref={profileRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setShowProfileDropdown((prev) => !prev);
-                setShowUsageDropdown(false);
-              }}
-              className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md border border-hairline hover:bg-surface text-[14px] font-medium text-ink transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
-              aria-expanded={showProfileDropdown}
-              aria-label="Cadet profile options"
-            >
-              <div className="w-5 h-5 rounded-full bg-card-tint-lavender text-brand-purple-800 flex items-center justify-center text-xs font-bold shrink-0">
-                {(isUser && user ? user.displayName : guest ? guest.name : 'C').charAt(0).toUpperCase()}
-              </div>
-              <span className="max-w-[120px] truncate">
-                {isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
-              </span>
-              <ChevronDown className={`w-3.5 h-3.5 text-steel transition-transform shrink-0 ${showProfileDropdown ? 'rotate-180' : ''}`} />
-            </button>
+            {(() => {
+              const displayName = isUser && user ? user.displayName : guest ? guest.name : 'Cadet';
+              const targetExamLabel = isUser && user?.targetExam ? formatTargetExamDisplay(user.targetExam, user.targetExamOther) : null;
 
-            {showProfileDropdown && (
-              <div className="absolute right-0 mt-2 w-64 bg-canvas rounded-lg p-4 shadow-level4 border border-hairline space-y-3 z-50 text-ink animate-fade-in">
-                <div className="pb-2 border-b border-hairline">
-                  <div className="font-semibold text-[15px] text-ink truncate">
-                    {isUser && user ? user.displayName : guest ? guest.name : 'Guest Cadet'}
-                  </div>
-                  {isUser && user ? (
-                    <div className="text-[12px] text-slate truncate mt-0.5">
-                      {user.email}
-                    </div>
-                  ) : (
-                    <div className="inline-flex items-center gap-1.5 mt-1 px-2 py-0.5 rounded-sm bg-card-tint-mint text-brand-green text-[12px] font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
-                      Practice mode active
-                    </div>
-                  )}
-                </div>
-
-                {/* Dark Mode Toggle Option (marked by arrow) */}
-                <div className="pb-1 border-b border-hairline">
-                  <button
-                    type="button"
-                    onClick={toggleTheme}
-                    className="w-full flex items-center justify-between px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
-                    role="switch"
-                    aria-checked={theme === 'dark'}
-                    aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                  >
-                    <div className="flex items-center gap-2">
-                      {theme === 'dark' ? (
-                        <Moon className="w-4 h-4 text-brand-purple-300" />
-                      ) : (
-                        <Sun className="w-4 h-4 text-brand-yellow" />
-                      )}
-                      <span className="font-medium text-ink">
-                        {lang === 'hi' ? siteConfig.auth.profileMenu.darkMode.hi : siteConfig.auth.profileMenu.darkMode.en}
-                      </span>
-                    </div>
-
-                    {/* Smooth Pill Switch */}
-                    <div
-                      className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out flex items-center ${
-                        theme === 'dark' ? 'bg-primary justify-end' : 'bg-hairline-strong justify-start'
-                      }`}
-                    >
-                      <div className="w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200" />
-                    </div>
-                  </button>
-                </div>
-
-                <div className="space-y-1">
+              return (
+                <>
                   <button
                     type="button"
                     onClick={() => {
-                      setShowProfileDropdown(false);
-                      setShowGuestModal(true);
+                      setShowProfileDropdown((prev) => !prev);
+                      setShowUsageDropdown(false);
                     }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                    className="inline-flex items-center gap-2 h-10 px-2.5 py-1.5 rounded-md border border-hairline hover:bg-surface text-[14px] font-medium text-ink transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
+                    aria-expanded={showProfileDropdown}
+                    aria-label="Cadet profile options"
                   >
-                    <Pencil className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
-                    <span>
-                      {isUser
-                        ? (lang === 'hi' ? siteConfig.auth.profileMenu.editName.hi : siteConfig.auth.profileMenu.editName.en)
-                        : 'Change callsign / name'}
+                    <Avatar
+                      size={32}
+                      name={displayName}
+                      userId={isUser && user ? user.id : guest?.id}
+                      avatarVersion={user?.avatarVersion}
+                      hasPhoto={user?.hasPhoto}
+                    />
+                    <span className="max-w-[120px] truncate">
+                      {displayName}
                     </span>
+                    <ChevronDown className={`w-3.5 h-3.5 text-steel transition-transform shrink-0 ${showProfileDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
-                  {!isUser && (
-                    <Link
-                      href="/sign-in"
-                      onClick={() => setShowProfileDropdown(false)}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-primary hover:bg-surface rounded-md transition-colors cursor-pointer text-left font-medium group"
-                    >
-                      <LogIn className="w-4 h-4 text-primary group-hover:text-primary-pressed transition-colors" />
-                      <span>
-                        {lang === 'hi' ? siteConfig.auth.profileMenu.signInOrCreate.hi : siteConfig.auth.profileMenu.signInOrCreate.en}
-                      </span>
-                    </Link>
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 mt-2 w-72 bg-canvas rounded-lg p-4 shadow-level4 border border-hairline space-y-3 z-50 text-ink animate-fade-in">
+                      {/* Dropdown Header: Avatar 44px + Name + Target Exam / Practice mode active */}
+                      <div className="pb-3 border-b border-hairline">
+                        <Link
+                          href="/profile"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="flex items-center gap-3 p-1.5 -m-1.5 rounded-md hover:bg-surface transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                          aria-label={`Open your profile, ${displayName}`}
+                        >
+                          <Avatar
+                            size={44}
+                            name={displayName}
+                            userId={isUser && user ? user.id : guest?.id}
+                            avatarVersion={user?.avatarVersion}
+                            hasPhoto={user?.hasPhoto}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-[16px] text-ink truncate group-hover:underline">
+                              {displayName}
+                            </div>
+                            {isUser ? (
+                              targetExamLabel ? (
+                                <div className="text-[13px] text-steel truncate mt-0.5">
+                                  {targetExamLabel}
+                                </div>
+                              ) : (
+                                <span className="text-[13px] text-link-blue hover:underline block truncate mt-0.5">
+                                  Add your target exam
+                                </span>
+                              )
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 mt-0.5 px-2 py-0.5 rounded-sm bg-card-tint-mint text-brand-green text-[12px] font-medium">
+                                <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                                Practice mode active
+                              </div>
+                            )}
+                          </div>
+                        </Link>
+                      </div>
+
+                      {/* Dark Mode Toggle Option */}
+                      <div className="pb-1 border-b border-hairline">
+                        <button
+                          type="button"
+                          onClick={toggleTheme}
+                          className="w-full flex items-center justify-between px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                          role="switch"
+                          aria-checked={theme === 'dark'}
+                          aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                        >
+                          <div className="flex items-center gap-2">
+                            {theme === 'dark' ? (
+                              <Moon className="w-4 h-4 text-brand-purple-300" />
+                            ) : (
+                              <Sun className="w-4 h-4 text-brand-yellow" />
+                            )}
+                            <span className="font-medium text-ink">
+                              {lang === 'hi' ? siteConfig.auth.profileMenu.darkMode.hi : siteConfig.auth.profileMenu.darkMode.en}
+                            </span>
+                          </div>
+
+                          {/* Smooth Pill Switch */}
+                          <div
+                            className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out flex items-center ${
+                              theme === 'dark' ? 'bg-primary justify-end' : 'bg-hairline-strong justify-start'
+                            }`}
+                          >
+                            <div className="w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200" />
+                          </div>
+                        </button>
+                      </div>
+
+                      <div className="space-y-1">
+                        {isUser ? (
+                          <Link
+                            href="/profile"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                          >
+                            <User className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
+                            <span>Edit profile</span>
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowProfileDropdown(false);
+                              setShowGuestModal(true);
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                          >
+                            <Pencil className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
+                            <span>Change callsign / name</span>
+                          </button>
+                        )}
+
+                        {!isUser && (
+                          <Link
+                            href="/sign-in"
+                            onClick={() => setShowProfileDropdown(false)}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-primary hover:bg-surface rounded-md transition-colors cursor-pointer text-left font-medium group"
+                          >
+                            <LogIn className="w-4 h-4 text-primary group-hover:text-primary-pressed transition-colors" />
+                            <span>
+                              {lang === 'hi' ? siteConfig.auth.profileMenu.signInOrCreate.hi : siteConfig.auth.profileMenu.signInOrCreate.en}
+                            </span>
+                          </Link>
+                        )}
+
+                        <Link
+                          href="/history"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                        >
+                          <History className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
+                          <span>Past Attempts</span>
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowProfileDropdown(false);
+                            setShowSettingsModal(true);
+                          }}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                        >
+                          <Settings className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
+                          <span>API Key Settings</span>
+                        </button>
+
+                        <Link
+                          href="/privacy"
+                          onClick={() => setShowProfileDropdown(false)}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
+                        >
+                          <FileText className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
+                          <span>Privacy Note</span>
+                        </Link>
+
+                        {isUser && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowProfileDropdown(false);
+                              signOut();
+                            }}
+                            className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-md transition-colors cursor-pointer text-left pt-2 border-t border-hairline mt-1"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>
+                              {lang === 'hi' ? siteConfig.auth.profileMenu.signOut.hi : siteConfig.auth.profileMenu.signOut.en}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Privacy Line */}
+                      <div className="pt-2 border-t border-hairline flex items-center gap-1.5 text-[12px] text-slate">
+                        <Lock className="w-3.5 h-3.5 text-semantic-success shrink-0" />
+                        <span>Handwriting photos are not saved by Veneha</span>
+                      </div>
+                    </div>
                   )}
-
-                  <Link
-                    href="/history"
-                    onClick={() => setShowProfileDropdown(false)}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
-                  >
-                    <History className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
-                    <span>Past Attempts</span>
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowProfileDropdown(false);
-                      setShowSettingsModal(true);
-                    }}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
-                  >
-                    <Settings className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
-                    <span>API Key Settings</span>
-                  </button>
-
-                  <Link
-                    href="/privacy"
-                    onClick={() => setShowProfileDropdown(false)}
-                    className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-charcoal hover:bg-surface hover:text-ink rounded-md transition-colors cursor-pointer text-left group"
-                  >
-                    <FileText className="w-4 h-4 text-steel group-hover:text-ink transition-colors" />
-                    <span>Privacy Note</span>
-                  </Link>
-
-                  {isUser && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowProfileDropdown(false);
-                        signOut();
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-2 text-[14px] text-rose-600 hover:bg-rose-50 hover:text-rose-700 rounded-md transition-colors cursor-pointer text-left pt-2 border-t border-hairline mt-1"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>
-                        {lang === 'hi' ? siteConfig.auth.profileMenu.signOut.hi : siteConfig.auth.profileMenu.signOut.en}
-                      </span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Privacy Line */}
-                <div className="pt-2 border-t border-hairline flex items-center gap-1.5 text-[12px] text-slate">
-                  <Lock className="w-3.5 h-3.5 text-semantic-success shrink-0" />
-                  <span>Photos not saved by Veneha</span>
-                </div>
-              </div>
-            )}
+                </>
+              );
+            })()}
           </div>
         </div>
 
@@ -696,45 +741,72 @@ export default function TopNavigation() {
 
             {/* Profile & Settings section in Drawer */}
             <div className="pt-2 border-t border-hairline space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 pr-2">
-                  <div className="font-semibold text-[15px] text-ink truncate">
-                    {isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
+              <div className="flex items-center justify-between gap-3">
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 min-w-0 flex-1 hover:opacity-80 transition-opacity"
+                >
+                  <Avatar
+                    size={32}
+                    name={isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
+                    userId={isUser && user ? user.id : guest?.id}
+                    avatarVersion={user?.avatarVersion}
+                    hasPhoto={user?.hasPhoto}
+                  />
+                  <div className="min-w-0">
+                    <div className="font-semibold text-[14px] text-ink truncate">
+                      {isUser && user ? user.displayName : guest ? guest.name : 'Cadet'}
+                    </div>
+                    <div className="text-[11px] text-slate truncate">
+                      {isUser
+                        ? (user?.targetExam ? formatTargetExamDisplay(user.targetExam, user.targetExamOther) : 'Add target exam')
+                        : 'Practice mode active'}
+                    </div>
                   </div>
-                  <div className="text-[12px] text-slate truncate">
-                    {isUser && user ? user.email : 'Practice mode active'}
-                  </div>
-                </div>
+                </Link>
+
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      setShowGuestModal(true);
-                    }}
-                    className="px-2.5 py-1.5 rounded-md border border-hairline bg-canvas text-[12px] font-medium text-charcoal hover:bg-surface"
-                  >
-                    {isUser ? 'Edit Name' : 'Change Name'}
-                  </button>
                   {isUser ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        signOut();
-                      }}
-                      className="px-2.5 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-[12px] font-medium text-rose-600 hover:bg-rose-100"
-                    >
-                      Sign Out
-                    </button>
+                    <>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="px-2.5 py-1.5 rounded-md border border-hairline bg-canvas text-[12px] font-medium text-charcoal hover:bg-surface"
+                      >
+                        Edit Profile
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          signOut();
+                        }}
+                        className="px-2.5 py-1.5 rounded-md border border-rose-200 bg-rose-50 text-[12px] font-medium text-rose-600 hover:bg-rose-100"
+                      >
+                        Sign Out
+                      </button>
+                    </>
                   ) : (
-                    <Link
-                      href="/sign-in"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="px-2.5 py-1.5 rounded-md bg-primary text-[12px] font-medium text-white hover:bg-primary-pressed"
-                    >
-                      Sign In
-                    </Link>
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileMenuOpen(false);
+                          setShowGuestModal(true);
+                        }}
+                        className="px-2.5 py-1.5 rounded-md border border-hairline bg-canvas text-[12px] font-medium text-charcoal hover:bg-surface"
+                      >
+                        Change Name
+                      </button>
+                      <Link
+                        href="/sign-in"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="px-2.5 py-1.5 rounded-md bg-primary text-[12px] font-medium text-white hover:bg-primary-pressed"
+                      >
+                        Sign In
+                      </Link>
+                    </>
                   )}
                 </div>
               </div>
